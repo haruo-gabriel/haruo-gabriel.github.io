@@ -8,7 +8,7 @@
 
 # Basic Site Settings
 locale                   : "pt-BR"
-title                    : "haruo-gabriel"
+title                    : ""
 title_separator          : # "-"
 name                     : &name
 description              : &description "personal description"
