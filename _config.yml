@@ -8,8 +8,8 @@
 
 # Basic Site Settings
 locale                   : "pt-BR"
-title                    : ""
-title_separator          : # "-"
+title                    : "Gabriel Haruo"
+title_separator          : "-"
 name                     : &name
 description              : &description "personal description"
 url                      : https://haruo-gabriel.github.io # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
