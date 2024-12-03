@@ -11,6 +11,10 @@ redirect_from:
 
 Education
 ======
+* B.S. in Computer Science, University of São Paulo, 2022 - 2026 (expected)
+
+<!-- Education
+======
 * Ph.D in Version Control Theory, GitHub University, 2018 (expected)
 * M.S. in Jekyll, GitHub University, 2014
 * B.S. in GitHub, GitHub University, 2012
@@ -61,4 +65,4 @@ Teaching
   
 Service and leadership
 ======
-* Currently signed in to 43 different slack teams
+* Currently signed in to 43 different slack teams -->
