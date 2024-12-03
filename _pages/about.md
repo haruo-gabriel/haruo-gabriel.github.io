@@ -9,7 +9,7 @@ redirect_from:
 
 Welcome to my personal website!
 
-Here, you can find information about my research, teaching, and other activities. I am an undergraduate student at the University of São Paulo (USP), where I am majoring in Computer Science. I am also a research intern at the Institute of Mathematics and Statistics (IME-USP), where I work on projects with the [Computer Music Research Group](https://compmus.ime.usp.br/en/).
+Here, you can find information about my research, teaching, and other activities. I am an undergraduate student at the University of São Paulo (USP), where I am majoring in Computer Science. I am also a research intern at the Institute of Mathematics and Statistics (IME-USP), where I work on projects with the [Computer Music Research Group](https://compmus.ime.usp.br/en/). My interests include computer music, digital signal processing for audio and image manipulation, and software engineering.
 
 Aside from my academic activities, I really love music. I'm a musician and a composer who plays the guitar and makes electronic music. You can find some of my pieces on my [Spotify](https://open.spotify.com/artist/17GgEguj01TBALcXJjBwXB), [SoundCloud](https://soundcloud.com/haruooo) and [Instagram](https://www.instagram.com/_haru.o).
 
