@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /usr/src/app
 
 # Copy Gemfile into the container (necessary for `bundle install`)
-COPY Gemfile Gemfile.lock ./
+COPY Gemfile ./
 
 # Install bundler and dependencies
 RUN gem install bundler:2.3.26 && bundle install
