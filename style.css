@@ -126,9 +126,10 @@ body {
 }
 
 .social-icon:hover {
-	border-color: #4a9eff;
-	color: #4a9eff;
+	border-color: #fff;
+	color: #fff;
 	transform: scale(1.1);
+	text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff;
 }
 
 .main-nav ul {
@@ -143,7 +144,7 @@ body {
 	color: #ccc;
 	text-decoration: none;
 	font-size: 1.4rem;
-	letter-spacing: 1px;
+	letter-spacing: 8px;
 	transition: all 0.3s ease;
 	cursor: pointer;
 }
@@ -175,15 +176,17 @@ body {
 
 .content-section h2 {
 	font-size: 2.5rem;
+	letter-spacing: 8px;
 	margin-bottom: 30px;
 	color: #010105;
 }
 
-.content-section p {
+/* Uniform spacing below section descriptions */
+.content-section > p {
 	font-size: 1.1rem;
 	line-height: 1.6;
 	color: #010105;
-	margin-bottom: 30px;
+	margin-bottom: 40px;
 }
 
 /* Release Items */
@@ -230,16 +233,21 @@ body {
 	left: 20px;
 }
 
-.release-info h3 {
+.release-info h3,
+.project-item h3 {
 	font-size: 1.5rem;
 	color: #010105;
 	margin-bottom: 15px;
 	font-weight: 600;
+	letter-spacing: 0.01em;
+	line-height: 1.2;
+	font-family: "Kiwi Maru", serif;
 }
 
 .release-info p {
-	color: #010105;
+	font-size: 1.1rem;
 	line-height: 1.6;
+	color: #010105;
 	margin: 0;
 }
 
@@ -288,32 +296,40 @@ body {
 	display: flex;
 }
 
-/* Project Grid */
+/* Project Grid - Remove all backgrounds and uniform styling */
 .project-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 	gap: 30px;
-	margin-top: 30px;
+	margin-top: 0;
 }
 
 .project-item {
-	background: rgba(255, 255, 255, 0.1);
-	padding: 30px;
-	border-radius: 12px;
-	backdrop-filter: blur(10px);
-	border: 1px solid rgba(255, 255, 255, 0.2);
+	background: none;
+	padding: 0;
+	border-radius: 0;
+	backdrop-filter: none;
+	border: none;
 }
 
 .project-item h3 {
+	font-size: 1.5rem;
 	color: #010105;
-	font-size: 1.3rem;
 	margin-bottom: 15px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+	line-height: 1.2;
+	font-family: "Kiwi Maru", serif;
 }
 
 .project-item p {
+	font-size: 1.1rem;
+	line-height: 1.6;
 	color: #010105;
 	margin: 0;
 }
+
+/* Remove card background and border for Eletrônicos section - now redundant as all sections have no background */
 
 /* --- Layout: Sidebar and Main Content as Responsive Columns --- */
 @media (max-width: 1024px) {
@@ -378,14 +394,23 @@ body {
 	}
 }
 
+/* Albums grid - uniform spacing */
 .content-section#musicas .albums-grid {
 	display: grid;
 	grid-template-columns: repeat(2, 1fr);
 	gap: 40px;
+	margin-top: 0;
 }
 
 .release-item {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+}
+
+.release-info p {
+	font-size: 1.1rem;
+	line-height: 1.6;
+	color: #010105;
+	margin: 0;
 }

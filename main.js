@@ -58,9 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	const socialIcons = document.querySelectorAll(".social-icon");
 	socialIcons.forEach((icon) => {
 		icon.addEventListener("click", function (e) {
-			e.preventDefault();
-			// Add your social media URLs here
-			console.log("Social media link clicked");
+			// Remove the preventDefault for social icons so links work
 		});
 	});
 
@@ -84,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	});
 
 	// Initialize with first section active
-	showSection("musicas");
+	showSection("sobre-mim");
 
 	// Modal functionality for album covers
 	const modal = document.createElement("div");
