@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	// Initialize with first section active
 	showSection("sobre-mim");
 
-	// Modal functionality for album covers
+	// Modal functionality for project images
 	const modal = document.createElement("div");
 	modal.classList.add("modal");
 	document.body.appendChild(modal);
@@ -92,11 +92,11 @@ document.addEventListener("DOMContentLoaded", function () {
 	const modalImage = document.createElement("img");
 	modal.appendChild(modalImage);
 
-	const albumCovers = document.querySelectorAll(".release-img");
+	const projectImages = document.querySelectorAll(".project-img");
 
-	albumCovers.forEach((cover) => {
-		cover.addEventListener("click", () => {
-			modalImage.src = cover.src;
+	projectImages.forEach((image) => {
+		image.addEventListener("click", () => {
+			modalImage.src = image.src;
 			modal.classList.add("active");
 		});
 	});

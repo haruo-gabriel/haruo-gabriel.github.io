@@ -189,15 +189,14 @@ body {
 	margin-bottom: 40px;
 }
 
-/* Release Items */
-.release-item {
+/* Project Items - Unified for all content sections */
+.project-item {
 	display: flex;
-	gap: 30px;
-	margin-bottom: 40px;
-	align-items: flex-start;
+	flex-direction: column;
+	align-items: center;
 }
 
-.release-cover {
+.project-cover {
 	flex-shrink: 0;
 }
 
@@ -233,7 +232,15 @@ body {
 	left: 20px;
 }
 
-.release-info h3,
+/* Unified content item styling for all sections */
+.project-item > div {
+	max-width: 80%;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
 .project-item h3 {
 	font-size: 1.5rem;
 	color: #010105;
@@ -244,28 +251,25 @@ body {
 	font-family: "Kiwi Maru", serif;
 }
 
-.release-info p {
+.project-item p {
 	font-size: 1.1rem;
 	line-height: 1.6;
 	color: #010105;
 	margin: 0;
 }
 
-.release-info {
-	max-width: 80%;
-	text-align: center;
-}
-
-.release-img {
+.project-img {
 	height: 300px;
 	object-fit: cover;
 	border-radius: 4px;
 	display: block;
 	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
 	transition: transform 0.3s ease, box-shadow 0.3s ease;
+	margin-bottom: 16px;
+	cursor: pointer;
 }
 
-.release-img:hover {
+.project-img:hover {
 	transform: scale(1.05);
 	box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -296,37 +300,13 @@ body {
 	display: flex;
 }
 
-/* Project Grid - Remove all backgrounds and uniform styling */
+/* Unified Grid System for all content sections */
+.albums-grid,
 .project-grid {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-	gap: 30px;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 40px;
 	margin-top: 0;
-}
-
-.project-item {
-	background: none;
-	padding: 0;
-	border-radius: 0;
-	backdrop-filter: none;
-	border: none;
-}
-
-.project-item h3 {
-	font-size: 1.5rem;
-	color: #010105;
-	margin-bottom: 15px;
-	font-weight: 600;
-	letter-spacing: 0.01em;
-	line-height: 1.2;
-	font-family: "Kiwi Maru", serif;
-}
-
-.project-item p {
-	font-size: 1.1rem;
-	line-height: 1.6;
-	color: #010105;
-	margin: 0;
 }
 
 /* Remove card background and border for Eletrônicos section - now redundant as all sections have no background */
@@ -334,10 +314,25 @@ body {
 /* --- Layout: Sidebar and Main Content as Responsive Columns --- */
 @media (max-width: 1024px) {
 	.container {
-		grid-template-columns: 350px 1fr;
+		grid-template-columns: 320px 1fr;
 	}
 	.sidebar {
-		width: 100%;
+		width: 320px;
+		padding: 20px;
+	}
+	.profile-name {
+		font-size: 2rem;
+		letter-spacing: 1px;
+		white-space: nowrap;
+	}
+	.main-content {
+		padding: 40px 30px;
+	}
+	/* Fix all grids for 1024px - single column */
+	.albums-grid,
+	.project-grid {
+		grid-template-columns: 1fr !important;
+		gap: 30px !important;
 	}
 }
 
@@ -354,23 +349,23 @@ body {
 		padding: 30px 20px;
 	}
 
-	.release-item {
+	.project-item {
 		flex-direction: column;
 		align-items: center;
 		gap: 20px;
 	}
 
-	.release-cover {
+	.project-cover {
 		margin-bottom: 10px;
 	}
 
-	.release-info {
+	.project-item > div {
 		text-align: center;
 	}
 
-	/* Fix albums grid for mobile */
-	.content-section#musicas .albums-grid {
-		display: grid;
+	/* Fix all grids for mobile */
+	.albums-grid,
+	.project-grid {
 		grid-template-columns: 1fr !important;
 		gap: 20px !important;
 	}
@@ -394,23 +389,19 @@ body {
 	}
 }
 
-/* Albums grid - uniform spacing */
-.content-section#musicas .albums-grid {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	gap: 40px;
-	margin-top: 0;
-}
-
-.release-item {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-
-.release-info p {
-	font-size: 1.1rem;
-	line-height: 1.6;
-	color: #010105;
+#big-interrogation {
+	font-size: 16rem;
+	font-weight: bold;
+	color: #666;
+	text-align: center;
 	margin: 0;
+	height: 296px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 12px;
 }
+
+
+
+
