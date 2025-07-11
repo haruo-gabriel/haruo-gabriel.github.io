@@ -134,6 +134,7 @@ body {
 
 .main-nav ul {
 	list-style: none;
+	/* Remove justify-items and justify-content for desktop */
 }
 
 .main-nav li {
@@ -369,6 +370,21 @@ body {
 		grid-template-columns: 1fr !important;
 		gap: 20px !important;
 	}
+
+	.main-nav ul {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 8px 12px;
+		justify-content: center;
+		justify-items: center;
+	}
+	.main-nav li {
+		margin-bottom: 0;
+	}
+
+	.social-icons {
+		justify-content: center;
+	}
 }
 
 @media (max-width: 480px) {
@@ -386,6 +402,11 @@ body {
 
 	.content-section h2 {
 		font-size: 2rem;
+	}
+
+	.nav-item {
+		font-size: 0.9rem;
+		letter-spacing: 0.35em;
 	}
 }
 
