@@ -200,8 +200,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	// Function to generate preview text from content
 	function generatePreview(content, maxLength = 300) {
-		// Remove extra whitespace and newlines
-		const cleanContent = content.replace(/\s+/g, ' ').trim();
+		// Clean content but preserve line breaks
+		const cleanContent = content
+			.replace(/\t/g, ' ')  // Replace tabs with spaces
+			.replace(/ {2,}/g, ' ')  // Replace multiple spaces with single space
+			.replace(/\n{3,}/g, '\n\n')  // Replace multiple newlines with double newlines
+			.trim();
 		
 		if (cleanContent.length <= maxLength) {
 			return cleanContent;
@@ -219,7 +223,13 @@ document.addEventListener("DOMContentLoaded", function () {
 			return truncated.substring(0, lastSentenceEnd + 1);
 		}
 		
-		// If no good sentence break, just cut at word boundary
+		// If no good sentence break, try to cut at line break
+		const lastLineBreak = truncated.lastIndexOf('\n');
+		if (lastLineBreak > maxLength * 0.5) {
+			return truncated.substring(0, lastLineBreak) + '...';
+		}
+		
+		// If no good line break, cut at word boundary
 		const lastSpace = truncated.lastIndexOf(' ');
 		return truncated.substring(0, lastSpace) + '...';
 	}
@@ -241,8 +251,9 @@ document.addEventListener("DOMContentLoaded", function () {
 				// Update title
 				titleElement.textContent = poem.title;
 				
-				// Update preview with generated preview text
-				previewElement.textContent = generatePreview(poem.content);
+				// Update preview with generated preview text, preserving line breaks
+				const previewText = generatePreview(poem.content);
+				previewElement.innerHTML = previewText.replace(/\n/g, '<br>');
 			}
 		} catch (error) {
 			console.error(`Error updating preview for ${poemKey}:`, error);

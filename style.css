@@ -555,6 +555,7 @@ body {
 	-webkit-line-clamp: 12;
 	line-clamp: 12;
 	-webkit-box-orient: vertical;
+	text-align: left;
 }
 
 /* Paper Modal Styles */
