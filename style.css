@@ -422,3 +422,40 @@ body {
 	justify-content: center;
 	margin-bottom: 12px;
 }
+
+/* Glow Animation Styles */
+.glow-active.profile-pic {
+	animation: glow-image 3s ease-in-out infinite alternate;
+	border-radius: 50%;
+}
+
+.glow-active.profile-name,
+.glow-active.profile-description {
+	animation: glow-text 3s ease-in-out infinite alternate;
+}
+
+@keyframes glow-image {
+	0% {
+		box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff;
+	}
+	100% {
+		box-shadow: 0 0 10px #fff, 0 0 15px #fff, 0 0 30px #fff;
+	}
+}
+
+@keyframes glow-text {
+	0% {
+		text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #fff;
+	}
+	100% {
+		text-shadow: 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #fff;
+	}
+}
+
+/* Make clickable elements have pointer cursor */
+.profile-pic,
+.profile-name,
+.profile-description {
+	cursor: pointer;
+	transition: all 3s ease;
+}

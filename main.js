@@ -104,4 +104,33 @@ document.addEventListener("DOMContentLoaded", function () {
 	modal.addEventListener("click", () => {
 		modal.classList.remove("active");
 	});
+
+	// Glow animation functionality for profile elements
+	const profilePic = document.querySelector(".profile-pic");
+	const profileName = document.querySelector(".profile-name");
+	const profileDescription = document.querySelector(".profile-description");
+
+	// Function to toggle glow animation
+	function toggleGlow(element) {
+		element.classList.toggle("glow-active");
+	}
+
+	// Add click event listeners to profile elements
+	if (profilePic) {
+		profilePic.addEventListener("click", function () {
+			toggleGlow(this);
+		});
+	}
+
+	if (profileName) {
+		profileName.addEventListener("click", function () {
+			toggleGlow(this);
+		});
+	}
+
+	if (profileDescription) {
+		profileDescription.addEventListener("click", function () {
+			toggleGlow(this);
+		});
+	}
 });
