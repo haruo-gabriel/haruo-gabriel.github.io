@@ -368,7 +368,7 @@ body {
 	.albums-grid,
 	.project-grid {
 		grid-template-columns: 1fr !important;
-		gap: 20px !important;
+		gap: 40px !important;
 	}
 
 	.main-nav ul {
