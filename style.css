@@ -381,6 +381,10 @@ body {
 	.main-nav li {
 		margin-bottom: 0;
 	}
+	.main-nav li:first-child {
+		grid-column: 1 / -1;
+		text-align: center;
+	}
 
 	.social-icons {
 		justify-content: center;
