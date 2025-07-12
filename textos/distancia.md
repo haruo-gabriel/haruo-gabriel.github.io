@@ -24,7 +24,7 @@ Infelizmente, pergunta errada.
 
 Questione, mas não faça dos jeitos errados.
 
-E qual é o jeito scerto?
+E qual é o jeito certo?
 
 Infelizmente, pergunta errada.
 
