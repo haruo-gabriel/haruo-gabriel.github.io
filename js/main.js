@@ -194,7 +194,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 	// Helper function to register a new poem
 	function registerPoem(poemKey, fileName = null) {
-		const filePath = fileName || `textos/${poemKey}.md`;
+		const filePath = fileName || `assets/textos/${poemKey}.md`;
 		return loadPoemFromMarkdown(poemKey, filePath);
 	}
 
@@ -244,7 +244,7 @@ document.addEventListener("DOMContentLoaded", function () {
 			
 			// Load poem if not already loaded
 			if (!poem) {
-				poem = await loadPoemFromMarkdown(poemKey, `textos/${poemKey}.md`);
+				poem = await loadPoemFromMarkdown(poemKey, `assets/textos/${poemKey}.md`);
 			}
 			
 			if (poem) {
