@@ -37,11 +37,13 @@ export function renderSidebar(container, activeSection = "sobre-mim", onNavClick
         </nav>
     `;
 
-    // Navigation click handler
-    container.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', e => {
+    // Navigation click handler using event delegation
+    const navList = container.querySelector('.main-nav ul');
+    navList.addEventListener('click', e => {
+        const item = e.target.closest('.nav-item');
+        if (item) {
             e.preventDefault();
             if (onNavClick) onNavClick(item.dataset.section);
-        });
+        }
     });
 }
