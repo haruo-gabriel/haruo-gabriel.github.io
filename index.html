@@ -213,12 +213,16 @@
 		</div>
 
 		<script type="module">
-			import { renderSidebar } from './js/sidebar.js';
+			import { renderSidebar, updateNavigationState } from './js/sidebar.js';
 			const sidebarContainer = document.querySelector('.sidebar');
 			renderSidebar(sidebarContainer, "sobre-mim", sectionId => {
-				// TODO: SPA navigation logic here
-				console.log('Navigate to section:', sectionId);
+				// Connect sidebar navigation to main.js showSection function
+				if (window.showSection) {
+					window.showSection(sectionId);
+				}
 			});
+			// Make updateNavigationState available globally
+			window.updateNavigationState = updateNavigationState;
 		</script>
 		<script src="js/placeholder.js"></script>
 		<script src="js/main.js"></script>

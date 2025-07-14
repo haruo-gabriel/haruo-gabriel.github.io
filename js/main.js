@@ -1,10 +1,9 @@
 document.addEventListener("DOMContentLoaded", function () {
-	// Get all navigation items and content sections
-	const navItems = document.querySelectorAll(".nav-item");
+	// Cache frequently accessed elements
 	const contentSections = document.querySelectorAll(".content-section");
 
-	// Function to show a specific section
-	function showSection(sectionId) {
+	// Function to show a specific section - exposed globally for sidebar integration
+	window.showSection = function showSection(sectionId) {
 		// Hide all content sections
 		contentSections.forEach((section) => {
 			section.classList.remove("active");
@@ -16,75 +15,22 @@ document.addEventListener("DOMContentLoaded", function () {
 			targetSection.classList.add("active");
 		}
 
-		// Update navigation active state
-		navItems.forEach((item) => {
-			item.classList.remove("active");
-		});
-
-		// Add active class to clicked nav item
-		const activeNavItem = document.querySelector(
-			`[data-section="${sectionId}"]`
-		);
-		if (activeNavItem) {
-			activeNavItem.classList.add("active");
+		// Update navigation active state using sidebar function
+		if (window.updateNavigationState) {
+			window.updateNavigationState(sectionId);
 		}
-	}
 
-	// Add click event listeners to navigation items
-	navItems.forEach((item) => {
-		item.addEventListener("click", function (e) {
-			e.preventDefault();
-			const sectionId = this.getAttribute("data-section");
-			showSection(sectionId);
-		});
-	});
-
-	// Smooth scrolling for better UX
-	function smoothScrollToTop() {
+		// Smooth scroll to top
 		window.scrollTo({
 			top: 0,
 			behavior: "smooth",
 		});
-	}
-
-	// Add smooth scroll when switching sections
-	navItems.forEach((item) => {
-		item.addEventListener("click", function () {
-			smoothScrollToTop();
-		});
-	});
-
-	// Social media links functionality (optional)
-	const socialIcons = document.querySelectorAll(".social-icon");
-	socialIcons.forEach((icon) => {
-		icon.addEventListener("click", function (e) {
-			// Remove the preventDefault for social icons so links work
-		});
-	});
-
-	// Keyboard navigation support
-	document.addEventListener("keydown", function (e) {
-		const currentActiveNav = document.querySelector(".nav-item.active");
-		const navItemsArray = Array.from(navItems);
-		const currentIndex = navItemsArray.indexOf(currentActiveNav);
-
-		if (e.key === "ArrowDown" && currentIndex < navItemsArray.length - 1) {
-			e.preventDefault();
-			const nextItem = navItemsArray[currentIndex + 1];
-			const sectionId = nextItem.getAttribute("data-section");
-			showSection(sectionId);
-		} else if (e.key === "ArrowUp" && currentIndex > 0) {
-			e.preventDefault();
-			const prevItem = navItemsArray[currentIndex - 1];
-			const sectionId = prevItem.getAttribute("data-section");
-			showSection(sectionId);
-		}
-	});
+	};
 
 	// Initialize with first section active
-	showSection("sobre-mim");
+	window.showSection("sobre-mim");
 
-	// Modal functionality for project images
+	// Modal functionality for project images using event delegation
 	const modal = document.createElement("div");
 	modal.classList.add("modal");
 	document.body.appendChild(modal);
@@ -92,47 +38,17 @@ document.addEventListener("DOMContentLoaded", function () {
 	const modalImage = document.createElement("img");
 	modal.appendChild(modalImage);
 
-	const projectImages = document.querySelectorAll(".project-img");
-
-	projectImages.forEach((image) => {
-		image.addEventListener("click", () => {
-			modalImage.src = image.src;
+	// Use event delegation for project images (handles dynamically added images)
+	document.addEventListener("click", (e) => {
+		if (e.target.classList.contains("project-img")) {
+			modalImage.src = e.target.src;
 			modal.classList.add("active");
-		});
+		}
 	});
 
 	modal.addEventListener("click", () => {
 		modal.classList.remove("active");
 	});
-
-	// Glow animation functionality for profile elements
-	const profilePic = document.querySelector(".profile-pic");
-	const profileName = document.querySelector(".profile-name");
-	const profileDescription = document.querySelector(".profile-description");
-
-	// Function to toggle glow animation
-	function toggleGlow(element) {
-		element.classList.toggle("glow-active");
-	}
-
-	// Add click event listeners to profile elements
-	if (profilePic) {
-		profilePic.addEventListener("click", function () {
-			toggleGlow(this);
-		});
-	}
-
-	if (profileName) {
-		profileName.addEventListener("click", function () {
-			toggleGlow(this);
-		});
-	}
-
-	if (profileDescription) {
-		profileDescription.addEventListener("click", function () {
-			toggleGlow(this);
-		});
-	}
 
 	// Paper modal functionality
 	const paperModal = document.createElement("div");
@@ -329,14 +245,14 @@ document.addEventListener("DOMContentLoaded", function () {
 		}, 300);
 	}
 
-	// Add click event listeners to paper previews
-	const paperPreviews = document.querySelectorAll('.project-paper');
-	paperPreviews.forEach(paper => {
-		paper.addEventListener('click', async (e) => {
+	// Add click event listeners to paper previews using event delegation
+	document.addEventListener("click", async (e) => {
+		const paper = e.target.closest('.project-paper');
+		if (paper) {
 			e.preventDefault();
 			const poemKey = paper.getAttribute('data-poem');
 			await displayPoem(poemKey);
-		});
+		}
 	});
 
 	// Close modal when clicking outside the content
