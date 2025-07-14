@@ -1,5 +1,13 @@
 // js/sidebar.js
 export function renderSidebar(container, activeSection = "sobre-mim", onNavClick) {
+    const sections = [
+        { id: "sobre-mim", label: "sobre mim" },
+        { id: "musicas", label: "músicas" },
+        { id: "textos", label: "textos" },
+        { id: "eletronicos", label: "eletrônicos" },
+        { id: "softwares", label: "softwares" },
+        { id: "pesquisas", label: "pesquisas" }
+    ];
     container.innerHTML = `
         <div class="profile-section">
             <div class="profile-row">
@@ -20,9 +28,9 @@ export function renderSidebar(container, activeSection = "sobre-mim", onNavClick
         </div>
         <nav class="main-nav">
             <ul>
-                ${["sobre-mim", "musicas", "textos", "eletronicos", "softwares", "pesquisas"].map(section => `
+                ${sections.map(section => `
                     <li>
-                        <a href="#" class="nav-item${section === activeSection ? " active" : ""}" data-section="${section}">${section.replace("-", " ")}</a>
+                        <a href="#" class="nav-item${section.id === activeSection ? " active" : ""}" data-section="${section.id}">${section.label}</a>
                     </li>
                 `).join("")}
             </ul>
