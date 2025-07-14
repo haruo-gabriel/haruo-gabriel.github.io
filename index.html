@@ -19,92 +19,7 @@
 	<body>
 		<div class="container">
 			<!-- Sidebar -->
-			<aside class="sidebar">
-				<div class="profile-section">
-					<div class="profile-row">
-						<div class="profile-image">
-							<img
-								src="assets/images/pfp.png"
-								alt="profile picture"
-								class="profile-pic"
-							/>
-						</div>
-						<div class="profile-text">
-							<h1 class="profile-name">g. haruo</h1>
-							<p class="profile-description">
-								tudo que vejo são formas e cores.
-							</p>
-						</div>
-					</div>
-				</div>
-
-				<div class="social-icons">
-					<a
-						href="https://github.com/haruo-gabriel"
-						class="social-icon"
-						target="_blank"
-						rel="noopener"
-						><i class="fab fa-github"></i
-					></a>
-					<a
-						href="https://soundcloud.com/haruooo"
-						class="social-icon"
-						target="_blank"
-						rel="noopener"
-						><i class="fab fa-soundcloud"></i
-					></a>
-					<!-- <a href="#" class="social-icon"><i class="fab fa-spotify"></i></a> -->
-					<a
-						href="https://www.instagram.com/_haru.o/"
-						class="social-icon"
-						target="_blank"
-						rel="noopener"
-						><i class="fab fa-instagram"></i
-					></a>
-					<a
-						href="https://www.youtube.com/@haruo_h/videos"
-						class="social-icon"
-						target="_blank"
-						rel="noopener"
-						><i class="fab fa-youtube"></i
-					></a>
-				</div>
-
-				<nav class="main-nav">
-					<ul>
-						<li>
-							<a href="#" class="nav-item active" data-section="sobre-mim"
-								>sobre mim</a
-							>
-						</li>
-						<li>
-							<a href="#" class="nav-item" data-section="musicas"
-								>músicas</a
-							>
-						</li>
-						<li>
-							<a href="#" class="nav-item" data-section="textos"
-								>textos</a
-							>
-						</li>
-						<li>
-							<a href="#" class="nav-item" data-section="eletronicos"
-								>eletrônicos</a
-							>
-						</li>
-						<li>
-							<a href="#" class="nav-item" data-section="softwares"
-								>softwares</a
-							>
-						</li>
-						<li>
-							<a href="#" class="nav-item" data-section="pesquisas"
-								>pesquisas</a
-							>
-						</li>
-					</ul>
-				</nav>
-			</aside>
+			<aside class="sidebar"></aside>
 
 			<!-- Main Content -->
 			<main class="main-content">
@@ -295,6 +210,14 @@
 			</main>
 		</div>
 
+		<script type="module">
+			import { renderSidebar } from './js/sidebar.js';
+			const sidebarContainer = document.querySelector('.sidebar');
+			renderSidebar(sidebarContainer, "sobre-mim", sectionId => {
+				// TODO: SPA navigation logic here
+				console.log('Navigate to section:', sectionId);
+			});
+		</script>
 		<script src="js/main.js"></script>
 	</body>
 </html>
