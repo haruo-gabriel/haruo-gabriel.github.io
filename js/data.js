@@ -1,10 +1,8 @@
-// js/data.js
 export const contentData = {
 	"sobre-mim": {
 		title: "sobre mim",
 		description: [
-			"Um pequeno portfolio digital de projetos que fiz e ando fazendo.",
-			"TODO: escrever algo interessante aqui.",
+			"Conheça um pouco sobre mim e meu trabalho por meio deste portfólio digital.",
 		],
 		items: [],
 	},
