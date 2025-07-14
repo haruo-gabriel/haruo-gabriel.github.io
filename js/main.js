@@ -1,26 +1,30 @@
-import { initializeContent } from './content-generator.js';
-import { renderSidebar, updateNavigationState } from './sidebar.js';
-import { initializePaperPreviews, setupPaperHandlers, displayPoem } from './poem.js';
+import { initializeContent } from "./content-generator.js";
+import { renderSidebar, updateNavigationState } from "./sidebar.js";
+import {
+	initializePaperPreviews,
+	setupPaperHandlers,
+	displayPoem,
+} from "./poem.js";
 
 document.addEventListener("DOMContentLoaded", function () {
 	// Initialize dynamic content generation
 	initializeContent();
-	
+
 	// Initialize sidebar
-	const sidebarContainer = document.querySelector('.sidebar');
-	renderSidebar(sidebarContainer, "sobre-mim", sectionId => {
+	const sidebarContainer = document.querySelector(".sidebar");
+	renderSidebar(sidebarContainer, "sobre-mim", (sectionId) => {
 		// Connect sidebar navigation to showSection function
 		if (window.showSection) {
 			window.showSection(sectionId);
 		}
 	});
-	
+
 	// Make functions available globally
 	window.updateNavigationState = updateNavigationState;
 	window.initializePaperPreviews = initializePaperPreviews;
 	window.setupPaperHandlers = setupPaperHandlers;
 	window.displayPoem = displayPoem;
-	
+
 	// Cache frequently accessed elements
 	const contentSections = document.querySelectorAll(".content-section");
 
@@ -28,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
 	window.showSection = function showSection(sectionId) {
 		// Update content sections cache after dynamic generation
 		const contentSections = document.querySelectorAll(".content-section");
-		
+
 		// Hide all content sections
 		contentSections.forEach((section) => {
 			section.classList.remove("active");
@@ -93,26 +97,26 @@ document.addEventListener("DOMContentLoaded", function () {
 	function closeModal() {
 		paperModal.classList.remove("active");
 		setTimeout(() => {
-			paperModal.style.display = 'none';
+			paperModal.style.display = "none";
 		}, 300);
 	}
 
 	// Function to show poem modal
 	async function showPoemModal(poemKey) {
 		// Show modal immediately with loading state
-		paperModal.style.display = 'flex';
+		paperModal.style.display = "flex";
 		requestAnimationFrame(() => {
-			paperModal.classList.add('active');
+			paperModal.classList.add("active");
 		});
 
 		// Use poem module to display poem
 		if (window.displayPoem) {
 			const poem = await window.displayPoem(poemKey, paperContent);
-			
+
 			// Re-attach close event listener
-			const closeBtn = paperContent.querySelector('.paper-close');
+			const closeBtn = paperContent.querySelector(".paper-close");
 			if (closeBtn) {
-				closeBtn.addEventListener('click', () => {
+				closeBtn.addEventListener("click", () => {
 					closeModal();
 				});
 			}
@@ -123,21 +127,21 @@ document.addEventListener("DOMContentLoaded", function () {
 	if (window.initializePaperPreviews) {
 		window.initializePaperPreviews();
 	}
-	
+
 	if (window.setupPaperHandlers) {
 		window.setupPaperHandlers(showPoemModal);
 	}
 
 	// Close modal when clicking outside the content
-	paperModal.addEventListener('click', (e) => {
+	paperModal.addEventListener("click", (e) => {
 		if (e.target === paperModal) {
 			closeModal();
 		}
 	});
 
 	// Close modal with Escape key
-	document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape' && paperModal.classList.contains('active')) {
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape" && paperModal.classList.contains("active")) {
 			closeModal();
 		}
 	});
