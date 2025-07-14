@@ -23,13 +23,14 @@
 
 			<!-- Main Content -->
 			<main class="main-content">
-				<div class="content-section active" id="sobre-mim">
-					<h2>sobre mim</h2>
-                    <p>Um pequeno portfolio digital de projetos que fiz e ando fazendo.</p>
-                    <p>TODO: escrever algo interessante aqui.</p>
-				</div>
+				<!-- Content will be dynamically generated -->
+			</main>
+		</div>
 
-				<!-- MUSICAS -->
+		<script type="module" src="js/main.js"></script>
+		<script src="js/placeholder.js"></script>
+	</body>
+</html>
 				<div class="content-section" id="musicas">
 					<h2>músicas</h2>
 					<p>
@@ -212,19 +213,7 @@
 			</main>
 		</div>
 
-		<script type="module">
-			import { renderSidebar, updateNavigationState } from './js/sidebar.js';
-			const sidebarContainer = document.querySelector('.sidebar');
-			renderSidebar(sidebarContainer, "sobre-mim", sectionId => {
-				// Connect sidebar navigation to main.js showSection function
-				if (window.showSection) {
-					window.showSection(sectionId);
-				}
-			});
-			// Make updateNavigationState available globally
-			window.updateNavigationState = updateNavigationState;
-		</script>
+		<script type="module" src="js/main.js"></script>
 		<script src="js/placeholder.js"></script>
-		<script src="js/main.js"></script>
 	</body>
 </html>

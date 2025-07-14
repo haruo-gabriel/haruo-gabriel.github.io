@@ -12,7 +12,7 @@ function createPlaceholderCanvas(size = 300, color = '#333') {
 }
 
 // Replaces project-cover divs containing a placeholder image with a placeholder-canvas div
-function replacePlaceholderDivs() {
+window.replacePlaceholderDivs = function replacePlaceholderDivs() {
     const placeholderDivs = document.querySelectorAll('.placeholder-canvas');
     placeholderDivs.forEach(div => {
         // Avoid duplicating canvas if already present
@@ -27,10 +27,10 @@ function replacePlaceholderDivs() {
             div.appendChild(createPlaceholderCanvas(size));
         }
     });
-}
+};
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', replacePlaceholderDivs);
+    document.addEventListener('DOMContentLoaded', window.replacePlaceholderDivs);
 } else {
-    replacePlaceholderDivs();
+    window.replacePlaceholderDivs();
 }
