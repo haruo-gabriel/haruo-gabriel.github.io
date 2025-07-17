@@ -73,8 +73,10 @@ body {
 	width: 120px;
 	height: 120px;
 	object-fit: cover;
-	background: linear-gradient(45deg, #1a1a1a, #333);
+	background: #ffffff; /* White background */
 	display: block;
+	border-radius: 4px; /* Optional: adds slight rounded corners */
+	padding: 4px; /* Optional: adds small white border effect */
 }
 
 .profile-text {

@@ -1,4 +1,25 @@
 // js/sidebar.js
+// Function to randomly select and set a profile picture
+function setRandomProfilePicture() {
+	const pfpImages = [
+		'assets/images/pfp/00-mousou.png',
+		'assets/images/pfp/01-stippling.png',
+		'assets/images/pfp/02-dots.png',
+		'assets/images/pfp/03-patterns.png',
+		'assets/images/pfp/04-bevel.png',
+		'assets/images/pfp/dithering_animation-full.gif'
+	];
+	
+	const randomIndex = Math.floor(Math.random() * pfpImages.length);
+	const selectedImage = pfpImages[randomIndex];
+	
+	const profilePic = document.querySelector('.profile-pic');
+	if (profilePic) {
+		profilePic.src = selectedImage;
+		profilePic.alt = 'profile picture';
+	}
+}
+
 export function renderSidebar(
 	container,
 	activeSection = "sobre-mim",
@@ -88,6 +109,9 @@ export function renderSidebar(
 
 // Function to update navigation active state
 export function updateNavigationState(sectionId) {
+	// Set a random profile picture after the HTML is rendered
+	setRandomProfilePicture();
+
 	// Update navigation active state
 	const navItems = document.querySelectorAll(".nav-item");
 	navItems.forEach((item) => {
