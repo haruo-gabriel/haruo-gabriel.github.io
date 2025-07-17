@@ -164,9 +164,15 @@ body {
 	margin-left: 0;
 	flex: 1;
 	padding: 60px 80px;
-	background: linear-gradient(135deg, #9fabcb 0%, #4f5565 100%);
+	background: linear-gradient(180deg, #b6c3e7 0%, #717992 100%); /* desktop default */
 	min-height: 100vh;
 	z-index: 1;
+}
+
+@media (max-width: 768px) {
+	.main-content {
+		background: linear-gradient(180deg, #b6c3e7 0%, #8f9ab8 100%); /* mobile override */
+	}
 }
 
 .content-section {
