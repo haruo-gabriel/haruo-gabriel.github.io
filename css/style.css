@@ -173,6 +173,12 @@ body {
 	.main-content {
 		background: linear-gradient(180deg, #b6c3e7 0%, #8f9ab8 100%); /* mobile override */
 	}
+	.social-icons {
+		margin-bottom: 24px;
+	}
+	.profile-section {
+		margin-bottom: 24px;
+	}
 }
 
 .content-section {
@@ -389,9 +395,10 @@ body {
 	.main-nav li {
 		margin-bottom: 0;
 	}
+	/* Remove special styling for first nav item */
 	.main-nav li:first-child {
-		grid-column: 1 / -1;
-		text-align: center;
+		grid-column: auto;
+		text-align: inherit;
 	}
 
 	.social-icons {
