@@ -73,7 +73,7 @@ body {
 	width: 120px;
 	height: 120px;
 	object-fit: cover;
-	background: #ffffff; /* White background */
+	background: #b6c3e7;
 	display: block;
 	border-radius: 4px; /* Optional: adds slight rounded corners */
 	padding: 4px; /* Optional: adds small white border effect */
@@ -172,6 +172,12 @@ body {
 @media (max-width: 768px) {
 	.main-content {
 		background: linear-gradient(180deg, #b6c3e7 0%, #8f9ab8 100%); /* mobile override */
+	}
+	.social-icons {
+		margin-bottom: 24px;
+	}
+	.profile-section {
+		margin-bottom: 24px;
 	}
 }
 
@@ -389,9 +395,10 @@ body {
 	.main-nav li {
 		margin-bottom: 0;
 	}
+	/* Remove special styling for first nav item */
 	.main-nav li:first-child {
-		grid-column: 1 / -1;
-		text-align: center;
+		grid-column: auto;
+		text-align: inherit;
 	}
 
 	.social-icons {

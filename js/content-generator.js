@@ -1,5 +1,6 @@
 // js/content-generator.js
 import { contentData } from "./data.js";
+import { getSobreMimHTML } from './sobre-mim.js';
 
 // Generate cover/media content based on type
 function generateCover(item) {
@@ -58,6 +59,10 @@ function generateProjectItem(item) {
 
 // Generate entire content section
 function generateContentSection(sectionId, data) {
+	if (sectionId === 'sobre-mim') {
+		return getSobreMimHTML();
+	}
+
 	const isActive = sectionId === "sobre-mim" ? " active" : "";
 	const descriptions = data.description
 		.map((desc) => `<p>${desc}</p>`)
