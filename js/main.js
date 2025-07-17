@@ -5,6 +5,7 @@ import {
 	setupPaperHandlers,
 	displayPoem,
 } from "./poem.js";
+import { applySobreMimContent } from './sobre-mim.js';
 
 document.addEventListener("DOMContentLoaded", function () {
 	// Initialize dynamic content generation
@@ -24,6 +25,9 @@ document.addEventListener("DOMContentLoaded", function () {
 	window.initializePaperPreviews = initializePaperPreviews;
 	window.setupPaperHandlers = setupPaperHandlers;
 	window.displayPoem = displayPoem;
+
+	// Optionally expose a global for manual sobre-mim rendering
+	window.applySobreMimContent = applySobreMimContent;
 
 	// Cache frequently accessed elements
 	const contentSections = document.querySelectorAll(".content-section");

@@ -33,7 +33,7 @@ export const contentData = {
 	textos: {
 		title: "textos",
 		description: [
-			"Alguns pequenos resultados que construí com palavras. E que não são códigos.",
+			"Pequenos resultados que construí com palavras. E que não são códigos.",
 		],
 		items: [
 			{

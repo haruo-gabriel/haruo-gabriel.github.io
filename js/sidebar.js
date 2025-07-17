@@ -69,8 +69,11 @@ export function renderSidebar(
         </nav>
     `;
 
-	// Navigation click handler using event delegation
-	const navList = container.querySelector(".main-nav ul");
+    // Set a random profile picture after the HTML is rendered
+    setRandomProfilePicture();
+
+    // Navigation click handler using event delegation
+    const navList = container.querySelector(".main-nav ul");
 	navList.addEventListener("click", (e) => {
 		const item = e.target.closest(".nav-item");
 		if (item) {
@@ -109,16 +112,12 @@ export function renderSidebar(
 
 // Function to update navigation active state
 export function updateNavigationState(sectionId) {
-	// Set a random profile picture after the HTML is rendered
-	setRandomProfilePicture();
-
-	// Update navigation active state
+	// Only update navigation active state, do NOT change profile picture
 	const navItems = document.querySelectorAll(".nav-item");
 	navItems.forEach((item) => {
 		item.classList.remove("active");
 	});
 
-	// Add active class to clicked nav item
 	const activeNavItem = document.querySelector(`[data-section="${sectionId}"]`);
 	if (activeNavItem) {
 		activeNavItem.classList.add("active");
