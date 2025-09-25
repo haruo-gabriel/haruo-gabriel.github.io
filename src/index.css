@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    font-family: 'Roboto', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-moso-blue {
+    color: #E5F6FD;
+  }
+  .text-moso-black {
+    color: #121713;
+  }
+  .bg-moso-blue {
+    background-color: #E5F6FD;
+  }
+  .bg-moso-black {
+    background-color: #121713;
+  }
+  .border-moso-blue {
+    border-color: #E5F6FD;
+  }
+  .border-moso-black {
+    border-color: #121713;
+  }
+}
