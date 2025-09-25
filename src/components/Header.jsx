@@ -11,7 +11,7 @@ function Header() {
 	// Effect to handle scroll event
 	useEffect(() => {
 		const handleScroll = () => {
-			if (window.scrollY > 50) {
+			if (window.scrollY > 4) {
 				setIsScrolled(true); // Shrink header when scrolled down
 			} else {
 				setIsScrolled(false); // Reset header when at the top
@@ -30,32 +30,99 @@ function Header() {
 		<header
 			className={`${
 				isScrolled ? "min-h-16" : "min-h-24"
-			} bg-moso-black p-4 fixed top-0 left-0 w-full transition-all duration-300`}
+			} bg-moso-black p-4 md:px-8 fixed top-0 left-0 w-full transition-all duration-500`}
 		>
 			<div className="flex items-center space-x-4 h-full">
-				<img
-					src="/pfp.png"
-					alt="Profile Picture"
-					className={`${
-						isScrolled ? "h-12" : "h-20"
-					} w-auto object-cover transition-all duration-300`}
-				/>
-				<div className="flex flex-col">
-					<h1
+				{/* Pfp */}
+				<div>
+					<img
+						src="/pfp.png"
+						alt="Profile Picture"
 						className={`${
+							isScrolled ? "h-12" : "h-27"
+						} w-auto object-cover transition-all duration-500`}
+					/>
+				</div>
+				<div className="flex flex-col space-y-1">
+					{/* My name */}
+					<h1
+						className={`text-moso-blue font-normal transition-all duration-500 ${
 							isScrolled ? "text-3xl" : "text-5xl"
-						} text-moso-blue font-normal transition-all duration-300`}
+						} `}
 					>
 						g. haruo
 					</h1>
-					<p
-						className={`${
-							isScrolled ? "hidden" : "visible"
-						} italic text-moso-blue`}
-					>
-						{translations[language]?.header?.quote ||
-							'"tudo que vejo são formas e cores"'}
-					</p>
+					{/* Div to hide the elements when page is scrolled */}
+					<div className={`${isScrolled ? "hidden" : "visible"}`}>
+						{/* Quote */}
+						<p className="italic text-moso-blue text-sm">
+							{translations[language]?.header?.quote ||
+								'"tudo que vejo são formas e cores"'}
+						</p>
+						{/* Social media icons */}
+						<div className="flex flex-row gap-3">
+							{/* Instagram */}
+							<a
+								href="https://www.instagram.com/_haru.o/"
+								aria-label="Instagram"
+								className="hover:opacity-70 transition-opacity"
+							>
+								<img
+									src="/icons8-instagram-50.png"
+									alt="Instagram"
+									className="w-5 h-5 object-contain filter-moso-blue"
+								/>
+							</a>
+							{/* SoundCloud */}
+							<a
+								href="https://soundcloud.com/haruooo"
+								aria-label="SoundCloud"
+								className="hover:opacity-70 transition-opacity"
+							>
+								<img
+									src="/icons8-soundcloud-50.png"
+									alt="SoundCloud"
+									className="w-5 h-5 object-contain filter-moso-blue"
+								/>
+							</a>
+							{/* Spotify */}
+							<a
+								href="https://open.spotify.com/artist/17GgEguj01TBALcXJjBwXB?si=HF4KLif5ThaydHJ8MosdsA"
+								aria-label="Spotify"
+								className="hover:opacity-70 transition-opacity"
+							>
+								<img
+									src="/icons8-spotify-50.png"
+									alt="Spotify"
+									className="w-5 h-5 object-contain filter-moso-blue"
+								/>
+							</a>
+							{/* YouTube */}
+							<a
+								href="https://www.youtube.com/@haruo_h"
+								aria-label="YouTube"
+								className="hover:opacity-70 transition-opacity"
+							>
+								<img
+									src="/icons8-youtube-50.png"
+									alt="YouTube"
+									className="w-5 h-5 object-contain filter-moso-blue"
+								/>
+							</a>
+							{/* GitHub */}
+							<a
+								href="https://github.com/haruo-gabriel"
+								aria-label="GitHub"
+								className="hover:opacity-70 transition-opacity"
+							>
+								<img
+									src="/icons8-github-50.png"
+									alt="GitHub"
+									className="w-5 h-5 object-contain filter-moso-blue"
+								/>
+							</a>
+						</div>
+					</div>
 				</div>
 				{/* Toggleable Menu Icon */}
 				<div onClick={toggleMenu} className="cursor-pointer ml-auto">

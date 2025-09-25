@@ -7,7 +7,6 @@ export const translations = {
   'en': {
     header: {
       quote: '"shapes and colors are all I see"',
-      menu: 'Menu'
     },
   }
 };

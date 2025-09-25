@@ -26,4 +26,10 @@
   .border-moso-black {
     border-color: #121713;
   }
+  .filter-moso-blue {
+    filter: brightness(0) saturate(100%) invert(97%) sepia(8%) saturate(476%) hue-rotate(172deg) brightness(102%) contrast(97%);
+  }
+  .link-styled {
+    @apply text-red-500 underline hover:text-red-700;
+  }
 }
