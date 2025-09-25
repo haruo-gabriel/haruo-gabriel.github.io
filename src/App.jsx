@@ -6,7 +6,7 @@ function App() {
 		<div className="min-h-screen bg-moso-blue">
 			<Header />
 			{/* Add padding-top to account for fixed header */}
-			<div className="pt-32">
+			<div className="pt-28 flex justify-center">
 				<Homepage />
 			</div>
 		</div>

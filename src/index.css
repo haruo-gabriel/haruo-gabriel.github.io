@@ -3,6 +3,7 @@
 @layer base {
   html {
     font-family: 'Roboto', system-ui, sans-serif;
+    font-weight: 300; /* font-light as default */
   }
 }
 

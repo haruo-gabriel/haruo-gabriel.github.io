@@ -44,14 +44,14 @@ function Header() {
 					<h1
 						className={`${
 							isScrolled ? "text-3xl" : "text-5xl"
-						} text-moso-blue transition-all duration-300`}
+						} text-moso-blue font-normal transition-all duration-300`}
 					>
 						g. haruo
 					</h1>
 					<p
 						className={`${
 							isScrolled ? "hidden" : "visible"
-						} font-light italic text-moso-blue`}
+						} italic text-moso-blue`}
 					>
 						{translations[language]?.header?.quote ||
 							'"tudo que vejo são formas e cores"'}
@@ -100,7 +100,7 @@ function Header() {
 								<button
 									onClick={() => changeLanguage(LANGUAGES.PT_BR)}
 									className={`hover:opacity-80 transition-opacity ${
-										language === LANGUAGES.PT_BR ? "font-bold" : "font-normal"
+										language === LANGUAGES.PT_BR ? "font-bold" : ""
 									}`}
 								>
 									pt-BR
@@ -109,7 +109,7 @@ function Header() {
 								<button
 									onClick={() => changeLanguage(LANGUAGES.EN)}
 									className={`hover:opacity-80 transition-opacity ${
-										language === LANGUAGES.EN ? "font-bold" : "font-normal"
+										language === LANGUAGES.EN ? "font-bold" : ""
 									}`}
 								>
 									en
