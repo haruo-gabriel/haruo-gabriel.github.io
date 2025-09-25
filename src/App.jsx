@@ -1,15 +1,13 @@
 import Header from "./components/Header";
+import Homepage from "./components/Homepage";
 
 function App() {
 	return (
-		<div>
+		<div className="min-h-screen bg-moso-blue">
 			<Header />
-			{/* Add placeholder content to make the page scrollable */}
-			<div className="h-[2000px] bg-gray-100">
-				{/* This div creates a large scrollable area */}
-				<p className="text-center pt-8 text-lg text-gray-700">
-					Scroll down to see the header shrink!
-				</p>
+			{/* Add padding-top to account for fixed header */}
+			<div className="pt-32">
+				<Homepage />
 			</div>
 		</div>
 	);
