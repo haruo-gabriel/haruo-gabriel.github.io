@@ -74,7 +74,7 @@ function Header() {
 					<p
 						className={`${
 							isScrolled ? "hidden" : "visible"
-						} italic text-moso-blue text-sm`}
+						} italic text-moso-blue text-xs`}
 					>
 						{translations[language]?.header?.quote ||
 							'"tudo que vejo são formas e cores"'}
