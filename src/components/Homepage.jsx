@@ -2,6 +2,24 @@
 import { useLanguage } from "../contexts/LanguageContext";
 import { translations } from "../translations/translations";
 
+// Project Square Subcomponent
+function ProjectSquare({ src, alt, projectName }) {
+	return (
+		<div className="relative group cursor-pointer overflow-hidden">
+			<img
+				src={src}
+				alt={alt}
+				className="w-full h-auto transition-all duration-300 group-hover:blur-md"
+			/>
+			<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+				<p className="text-white text-xl bg-black bg-opacity-50 px-4 py-2">
+					{projectName}
+				</p>
+			</div>
+		</div>
+	);
+}
+
 function Homepage() {
 	const { language } = useLanguage();
 
@@ -113,23 +131,31 @@ function Homepage() {
 					e criar. Aqui está um pequeno panorama dos meus projetos:
 				</p>
 				<div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-					<img
+					<ProjectSquare
 						src="/a_deriva-capa.png"
 						alt="À Deriva - Capa"
-						className="w-full h-auto"
+						projectName="À Deriva"
 					/>
-					<img
+					<ProjectSquare
 						src="/imensidão-capa.png"
 						alt="Imensidão - Capa"
-						className="w-full h-auto"
+						projectName="Imensidão Pt. 1"
 					/>
-					<img
+					<ProjectSquare
 						src="/menis_mangione_mfx-capa.png"
 						alt="Menis Mangione MFX"
-						className="w-full h-auto"
+						projectName="Menis Mangione MFX"
 					/>
-					<div className="flex justify-center items-center bg-moso-black w-full aspect-square">
-						<p className="text-white text-center">Este website.</p>
+					{/* Exception: procedurally generated project */}
+					<div className="relative group cursor-pointer overflow-hidden flex justify-center items-center bg-moso-black w-full aspect-square">
+						<p className="text-white text-center transition-all duration-300 group-hover:blur-sm">
+							Este website.
+						</p>
+						<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+							<p className="text-white text-xl bg-black bg-opacity-50 px-4 py-2">
+								Portfolio
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
