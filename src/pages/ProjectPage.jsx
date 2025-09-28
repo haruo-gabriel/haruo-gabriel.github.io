@@ -124,8 +124,8 @@ const projectsData = {
 			<>
 				<p>
 					<strong className="italic">Este website</strong> é meu portfolio
-					digital. Sempre adorei a ideia de ter um lugar meu na internet, um que
-					cada detalhe foi minuciosamente pensado e baseado no meu próprio
+					digital. Sempre adorei a ideia de ter um lugar meu na internet, um em
+					que cada detalhe foi minuciosamente pensado e baseado no meu próprio
 					gosto. É como ter um quarto na web, mas não custa nada para decorá-lo.
 					Todo mundo gosta de deixar o próprio quarto com uma cara autêntica.
 				</p>
