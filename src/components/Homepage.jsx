@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 function ProjectSquare({ src, alt, projectName, projectId }) {
 	return (
 		<Link
-			to={`/project/${projectId}`}
+			to={`/projects/${projectId}`}
 			className="relative group cursor-pointer overflow-hidden block"
 		>
 			<img

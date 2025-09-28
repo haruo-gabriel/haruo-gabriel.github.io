@@ -2,7 +2,7 @@ import { useParams, Link } from "react-router-dom";
 
 // Project data structure
 const projectsData = {
-	imensidao: {
+	"imensidao-pt-1": {
 		title: "Imensidão Pt. 1",
 		image: "/imensidão-capa.png",
 		content: (
@@ -63,7 +63,7 @@ const projectsData = {
 			</>
 		),
 	},
-	"menis-mangione": {
+	"menis-mangione-mfx": {
 		title: "Mangione MFX",
 		image: "/menis_mangione_mfx-capa.png",
 		content: (
@@ -117,7 +117,7 @@ const projectsData = {
 			</>
 		),
 	},
-	portfolio: {
+	"portfolio": {
 		title: "Este website.",
 		image: "/portfolio-capa.png",
 		content: (
