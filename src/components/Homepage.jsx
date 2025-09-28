@@ -33,9 +33,7 @@ function Homepage() {
 			<h1 className="sr-only">g. haruo - Portfolio</h1>
 			{/* formalidades */}
 			<div className="flex flex-col space-y-2">
-				<h2 className="section-title">
-					formalidades
-				</h2>
+				<h2 className="section-title">formalidades</h2>
 				<p>
 					<span className="font-normal">
 						Universidade de São Paulo, Instituto de Matemática e Estatística
@@ -100,9 +98,7 @@ function Homepage() {
 			</div>
 			{/* não-formalidades */}
 			<div className="flex flex-col space-y-2">
-				<h2 className="section-title">
-					não-formalidades
-				</h2>
+				<h2 className="section-title">não-formalidades</h2>
 				<p>
 					Fora do acadêmico, costumo me divertir aprendendo sobre assuntos
 					diversos. Na maior parte, bem mais que meu próprio campo de estudo.
@@ -141,7 +137,7 @@ function Homepage() {
 						src="/imensidão-capa.png"
 						alt="Imensidão - Capa"
 						projectName="Imensidão Pt. 1"
-						projectId="imensidao"
+						projectId="imensidao-pt-1"
 					/>
 					<ProjectSquare
 						src="/a_deriva-capa.png"
@@ -153,7 +149,7 @@ function Homepage() {
 						src="/menis_mangione_mfx-capa.png"
 						alt="Menis Mangione MFX"
 						projectName="Menis Mangione MFX"
-						projectId="menis-mangione"
+						projectId="menis-mangione-mfx"
 					/>
 					<ProjectSquare
 						src="/portfolio-capa.png"

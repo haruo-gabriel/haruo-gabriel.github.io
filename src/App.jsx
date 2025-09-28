@@ -9,12 +9,9 @@ function App() {
 		<Router>
 			<ScrollToTop />
 			<Routes>
-				{/* Layout wraps all routes */}
 				<Route path="/" element={<Layout />}>
-					{/* Homepage at root */}
 					<Route index element={<Homepage />} />
-					{/* Project pages with dynamic ID */}
-					<Route path="project/:projectId" element={<ProjectPage />} />
+					<Route path="projects/:projectId" element={<ProjectPage />} />
 				</Route>
 			</Routes>
 		</Router>

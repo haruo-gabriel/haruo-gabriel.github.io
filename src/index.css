@@ -1,44 +1,45 @@
 @import "tailwindcss";
 
 @layer base {
-  html {
-    font-family: 'Roboto', system-ui, sans-serif;
-    font-weight: 300; /* font-light as default */
-  }
-  p {
-    @apply mb-2;
-  }
+	html {
+		font-family: "Roboto", system-ui, sans-serif;
+		font-weight: 300; /* font-light as default */
+	}
+	p {
+		@apply mb-2;
+	}
 }
 
 @layer utilities {
-  .text-moso-blue {
-    color: #E5F6FD;
-  }
-  .text-moso-black {
-    color: #121713;
-  }
-  .bg-moso-blue {
-    background-color: #E5F6FD;
-  }
-  .bg-moso-black {
-    background-color: #121713;
-  }
-  .border-moso-blue {
-    border-color: #E5F6FD;
-  }
-  .border-moso-black {
-    border-color: #121713;
-  }
-  .filter-moso-blue {
-    filter: brightness(0) saturate(100%) invert(97%) sepia(8%) saturate(476%) hue-rotate(172deg) brightness(102%) contrast(97%);
-  }
-  .link-styled {
-    @apply text-red-600 underline hover:text-red-700;
-  }
-  .section-title {
-    @apply text-black text-4xl font-medium text-right;
-  }
-  .section-subtitle {
-    @apply text-black text-2xl font-medium text-right;
-  }
+	.text-moso-blue {
+		color: #e5f6fd;
+	}
+	.text-moso-black {
+		color: #121713;
+	}
+	.bg-moso-blue {
+		background-color: #e5f6fd;
+	}
+	.bg-moso-black {
+		background-color: #121713;
+	}
+	.border-moso-blue {
+		border-color: #e5f6fd;
+	}
+	.border-moso-black {
+		border-color: #121713;
+	}
+	.filter-moso-blue {
+		filter: brightness(0) saturate(100%) invert(97%) sepia(8%) saturate(476%)
+			hue-rotate(172deg) brightness(102%) contrast(97%);
+	}
+	.link-styled {
+		@apply text-red-600 underline hover:text-red-700;
+	}
+	.section-title {
+		@apply text-black text-4xl font-medium text-right;
+	}
+	.section-subtitle {
+		@apply text-black text-2xl font-medium text-right;
+	}
 }
