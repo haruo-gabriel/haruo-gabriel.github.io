@@ -1,11 +1,15 @@
 // Homepage Component
 import { useLanguage } from "../contexts/LanguageContext";
 import { translations } from "../translations/translations";
+import { Link } from "react-router-dom";
 
 // Project Square Subcomponent
-function ProjectSquare({ src, alt, projectName }) {
+function ProjectSquare({ src, alt, projectName, projectId }) {
 	return (
-		<div className="relative group cursor-pointer overflow-hidden">
+		<Link
+			to={`/project/${projectId}`}
+			className="relative group cursor-pointer overflow-hidden block"
+		>
 			<img
 				src={src}
 				alt={alt}
@@ -16,7 +20,7 @@ function ProjectSquare({ src, alt, projectName }) {
 					{projectName}
 				</p>
 			</div>
-		</div>
+		</Link>
 	);
 }
 
@@ -24,10 +28,12 @@ function Homepage() {
 	const { language } = useLanguage();
 
 	return (
-		<div className="flex flex-col max-w-4xl w-full space-y-8">
+		<div className="flex flex-col space-y-8">
+			{/* Hidden H1 for SEO - visually the name is in the header */}
+			<h1 className="sr-only">g. haruo - Portfolio</h1>
 			{/* formalidades */}
-			<div className="flex flex-col space-y-4 px-8">
-				<h2 className="text-black text-4xl font-medium text-right">
+			<div className="flex flex-col space-y-2">
+				<h2 className="section-title">
 					formalidades
 				</h2>
 				<p>
@@ -93,8 +99,8 @@ function Homepage() {
 				</p>
 			</div>
 			{/* não-formalidades */}
-			<div className="flex flex-col space-y-4 px-8">
-				<h2 className="text-black text-4xl font-medium text-right">
+			<div className="flex flex-col space-y-2">
+				<h2 className="section-title">
 					não-formalidades
 				</h2>
 				<p>
@@ -124,39 +130,37 @@ function Homepage() {
 				</ul>
 			</div>
 			{/* projetos */}
-			<div className="flex flex-col space-y-4 px-8">
-				<h2 className="text-black text-4xl font-medium text-right">projetos</h2>
+			<div className="flex flex-col space-y-4">
+				<h2 className="section-title">projetos</h2>
 				<p>
 					A vida só pode ser tolerada ao mergulhar no ciclo vicioso de absorver
 					e criar. Aqui está um pequeno panorama dos meus projetos:
 				</p>
 				<div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
 					<ProjectSquare
-						src="/a_deriva-capa.png"
-						alt="À Deriva - Capa"
-						projectName="À Deriva"
-					/>
-					<ProjectSquare
 						src="/imensidão-capa.png"
 						alt="Imensidão - Capa"
 						projectName="Imensidão Pt. 1"
+						projectId="imensidao"
+					/>
+					<ProjectSquare
+						src="/a_deriva-capa.png"
+						alt="À Deriva - Capa"
+						projectName="À Deriva"
+						projectId="a-deriva"
 					/>
 					<ProjectSquare
 						src="/menis_mangione_mfx-capa.png"
 						alt="Menis Mangione MFX"
 						projectName="Menis Mangione MFX"
+						projectId="menis-mangione"
 					/>
-					{/* Exception: procedurally generated project */}
-					<div className="relative group cursor-pointer overflow-hidden flex justify-center items-center bg-moso-black w-full aspect-square">
-						<p className="text-white text-center transition-all duration-300 group-hover:blur-sm">
-							Este website.
-						</p>
-						<div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-							<p className="text-white text-xl bg-black bg-opacity-50 px-4 py-2">
-								Portfolio
-							</p>
-						</div>
-					</div>
+					<ProjectSquare
+						src="/portfolio-capa.png"
+						alt="Este website."
+						projectName="Este website."
+						projectId="portfolio"
+					/>
 				</div>
 			</div>
 		</div>

@@ -1,16 +1,23 @@
-import Header from "./components/Header";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./components/Layout";
 import Homepage from "./components/Homepage";
-import Footer from "./components/Footer";
+import ProjectPage from "./pages/ProjectPage";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
 	return (
-		<div className="min-h-screen bg-moso-blue">
-			<Header />
-			<div className="pt-48 pb-8 flex justify-center">
-				<Homepage />
-			</div>
-			<Footer />
-		</div>
+		<Router>
+			<ScrollToTop />
+			<Routes>
+				{/* Layout wraps all routes */}
+				<Route path="/" element={<Layout />}>
+					{/* Homepage at root */}
+					<Route index element={<Homepage />} />
+					{/* Project pages with dynamic ID */}
+					<Route path="project/:projectId" element={<ProjectPage />} />
+				</Route>
+			</Routes>
+		</Router>
 	);
 }
 

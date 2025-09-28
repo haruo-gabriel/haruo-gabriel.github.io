@@ -5,6 +5,9 @@
     font-family: 'Roboto', system-ui, sans-serif;
     font-weight: 300; /* font-light as default */
   }
+  p {
+    @apply mb-2;
+  }
 }
 
 @layer utilities {
@@ -30,6 +33,12 @@
     filter: brightness(0) saturate(100%) invert(97%) sepia(8%) saturate(476%) hue-rotate(172deg) brightness(102%) contrast(97%);
   }
   .link-styled {
-    @apply text-red-500 underline hover:text-red-700;
+    @apply text-red-600 underline hover:text-red-700;
+  }
+  .section-title {
+    @apply text-black text-4xl font-medium text-right;
+  }
+  .section-subtitle {
+    @apply text-black text-2xl font-medium text-right;
   }
 }
