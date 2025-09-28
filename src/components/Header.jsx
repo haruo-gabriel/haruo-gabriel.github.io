@@ -12,15 +12,28 @@ function Header() {
 	// Effect to handle scroll event
 	useEffect(() => {
 		const handleScroll = () => {
-			if (window.scrollY > 4) {
-				setIsScrolled(true); // Shrink header when scrolled down
-			} else {
-				setIsScrolled(false); // Reset header when at the top
-			}
+			// Use requestAnimationFrame to defer layout calculations
+			requestAnimationFrame(() => {
+				if (window.scrollY > 4) {
+					setIsScrolled(true); // Shrink header when scrolled down
+				} else {
+					setIsScrolled(false); // Reset header when at the top
+				}
+			});
 		};
 
-		window.addEventListener("scroll", handleScroll);
-		return () => window.removeEventListener("scroll", handleScroll);
+		// Check initial scroll position after DOM is ready
+		if (document.readyState === 'complete') {
+			handleScroll();
+		} else {
+			window.addEventListener('load', handleScroll);
+		}
+
+		window.addEventListener("scroll", handleScroll, { passive: true });
+		return () => {
+			window.removeEventListener("scroll", handleScroll);
+			window.removeEventListener('load', handleScroll);
+		};
 	}, []);
 
 	const toggleMenu = () => {

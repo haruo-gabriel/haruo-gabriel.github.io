@@ -4,10 +4,23 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Preconnect to external domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Load fonts with display=swap for better performance -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
     <title>g. haruo</title>
+    <!-- Add minimal critical CSS to prevent layout shift -->
+    <style>
+      /* Critical CSS to prevent layout shift */
+      body {
+        margin: 0;
+        font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+      }
+      #root {
+        min-height: 100vh;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
