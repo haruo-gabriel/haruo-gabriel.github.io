@@ -148,6 +148,7 @@ body {
   max-width: 800px;
   padding: 0rem 2rem;
   text-align: center;
+  min-height: 100vh;
 }
 
 .nav-section {
