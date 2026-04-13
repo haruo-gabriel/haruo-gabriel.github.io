@@ -189,19 +189,17 @@ body {
 
 /* Generic content section styles */
 .content-section {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: left;
   width: 100%;
-  padding-top: 8rem;
-  padding-bottom: 5rem;
+  padding-bottom: 4rem;
 }
 
 .section-title {
   font-family: var(--font-main);
-  font-size: 2.0rem;
-  margin-bottom: 2rem;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
   color: var(--text-color);
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
   text-align: left;
@@ -211,7 +209,7 @@ body {
 
 .section-subtitle {
   font-family: var(--font-main);
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   margin-bottom: 1.5rem;
   text-align: left;
   width: 100%;
@@ -219,7 +217,7 @@ body {
 }
 
 .section-desc {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-family: var(--font-secondary);
   line-height: 1.8;
   max-width: 800px;
@@ -228,7 +226,7 @@ body {
 }
 
 .section-desc p {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .section-desc ul {
@@ -239,4 +237,15 @@ body {
 
 .section-desc p:last-child {
   margin-bottom: 0;
+}
+
+a {
+  color: var(--text-color);
+  text-decoration: underline;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  opacity: 0.6;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
