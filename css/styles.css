@@ -1,0 +1,269 @@
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300..700;1,300..700&display=swap');
+
+
+:root {
+  --bg-color: #050505;
+  /* Deep black with a tiny bit of warmth/light for screen */
+  --text-color: #f2f2f2;
+  --text-muted: #a0a0a0;
+  --font-main: 'Special Elite', system-ui;
+  --font-secondary: 'Cormorant', serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* scroll-snap-type: y mandatory; */
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: var(--font-main);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* Header styling */
+.header {
+  position: sticky;
+  top: 1.5rem;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  z-index: 100;
+  overflow: hidden;
+  
+  /* Glassmorphism effect similar to glass-card */
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 22px 11px rgba(255, 255, 255, 0.05); /* Toned down 1.1 to 0.05 so it fits dark mode text */
+  
+  opacity: 0.9;
+  transition: all 0.3s ease;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.8),
+    transparent
+  );
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.8),
+    transparent,
+    rgba(255, 255, 255, 0.3)
+  );
+}
+
+.header a {
+  text-decoration: none;
+  /* Premium Metallic styling */
+  background: linear-gradient(135deg,
+      #ffffff 0%,
+      #888888 25%,
+      #e0e0e0 50%,
+      #444444 75%,
+      #ffffff 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow:
+    1px 1px 1px rgba(255, 255, 255, 0.3),
+    -1px -1px 1px rgba(0, 0, 0, 0.8);
+  transition: all 0.4s ease;
+}
+
+.header:hover {
+  opacity: 1;
+}
+
+.header a:hover {
+  background-position: right center;
+  text-shadow:
+    0 0 8px rgba(255, 255, 255, 0.5),
+    0 0 20px rgba(255, 255, 255, 0.2);
+  display: inline-block;
+}
+
+/* Main Content Container */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 800px;
+  padding: 0 2rem;
+  text-align: center;
+}
+
+.nav-section {
+  min-height: 100vh;
+  flex: 1;
+}
+
+.nav-section,
+.quote-section {
+  /* scroll-snap-align: start; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  align-items: center;
+  width: 100%;
+}
+
+/* Quote specific styling */
+.quote-section {
+  min-height: 100vh;
+}
+
+.lacan-quote {
+  font-family: var(--font-main);
+  font-size: 1.5rem;
+  max-width: 500px;
+  line-height: 1.4;
+  color: var(--text-color);
+  opacity: 0.9;
+}
+
+.lacan-quote span {
+  display: block;
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
+/* Navigation List (index page) */
+.nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.nav-list a {
+  color: var(--text-color);
+  text-decoration: none;
+  font-size: 1.8rem;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.nav-list a:hover {
+  opacity: 0.6;
+  transform: scale(1.01);
+  /* Slight pop effect */
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* Bio / Text specific styling */
+.bio-content p {
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Content sections for scrolling (Hardwares/Softwares) */
+.content-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.section-title {
+  font-family: var(--font-main);
+  font-size: 2.0rem;
+  margin-bottom: 2rem;
+  color: var(--text-color);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  text-align: left;
+  width: 100%;
+  max-width: 800px;
+}
+
+.section-desc {
+  font-size: 1.2rem;
+  font-family: var(--font-secondary);
+  line-height: 1.8;
+  max-width: 800px;
+  text-align: left;
+  color: #ccc;
+}
+
+.section-desc p {
+  margin-bottom: 1.5rem;
+}
+
+.section-desc ul {
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
+  text-align: left;
+}
+
+.section-desc p:last-child {
+  margin-bottom: 0;
+}
+
+/* TCC page styling */
+.tcc-content {}
+
+/* Page fade-in effect to feel like an SPA */
+body {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
