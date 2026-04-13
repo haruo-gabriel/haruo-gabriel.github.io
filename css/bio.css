@@ -1,0 +1,17 @@
+/* bio.css - Specific styles for the bio page */
+
+.bio-content {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.bio-content p {
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}

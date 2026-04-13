@@ -1,0 +1,45 @@
+/* content.css - Shared styles for content list pages (hardwares, softwares, etc) */
+
+.content-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-top: 8rem;
+  padding-bottom: 5rem;
+}
+
+.section-title {
+  font-family: var(--font-main);
+  font-size: 2.0rem;
+  margin-bottom: 2rem;
+  color: var(--text-color);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  text-align: left;
+  width: 100%;
+  max-width: 800px;
+}
+
+.section-desc {
+  font-size: 1.2rem;
+  font-family: var(--font-secondary);
+  line-height: 1.8;
+  max-width: 800px;
+  text-align: left;
+  color: #ccc;
+}
+
+.section-desc p {
+  margin-bottom: 1.5rem;
+}
+
+.section-desc ul {
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
+  text-align: left;
+}
+
+.section-desc p:last-child {
+  margin-bottom: 0;
+}

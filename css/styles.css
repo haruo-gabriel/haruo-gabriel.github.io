@@ -26,9 +26,9 @@ body {
   background-color: var(--bg-color);
   color: var(--text-color);
   font-family: var(--font-main);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  grid-template-areas: "stack";
+  justify-items: center;
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
@@ -37,6 +37,8 @@ body {
 
 /* Header styling */
 .header {
+  grid-area: stack;
+  align-self: start;
   position: sticky;
   top: 1.5rem;
   margin-top: 3rem;
@@ -47,18 +49,19 @@ body {
   letter-spacing: 2px;
   z-index: 100;
   overflow: hidden;
-  
+
   /* Glassmorphism effect similar to glass-card */
   background: rgba(20, 20, 20, 0.6);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.5),
     inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-    inset 0 0 22px 11px rgba(255, 255, 255, 0.05); /* Toned down 1.1 to 0.05 so it fits dark mode text */
-  
+    inset 0 0 22px 11px rgba(255, 255, 255, 0.05);
+  /* Toned down 1.1 to 0.05 so it fits dark mode text */
+
   opacity: 0.9;
   transition: all 0.3s ease;
 }
@@ -70,12 +73,10 @@ body {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.8),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.8),
+      transparent);
 }
 
 .header::after {
@@ -85,12 +86,10 @@ body {
   left: 0;
   width: 1px;
   height: 100%;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.8),
-    transparent,
-    rgba(255, 255, 255, 0.3)
-  );
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.8),
+      transparent,
+      rgba(255, 255, 255, 0.3));
 }
 
 .header a {
@@ -126,14 +125,15 @@ body {
 
 /* Main Content Container */
 .main-content {
-  flex: 1;
+  grid-area: stack;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: start;
   width: 100%;
   max-width: 800px;
-  padding: 0 2rem;
+  padding: 0rem 2rem;
   text-align: center;
+  min-height: 100vh;
 }
 
 .nav-section {
@@ -141,37 +141,16 @@ body {
   flex: 1;
 }
 
-.nav-section,
-.quote-section {
+.nav-section {
   /* scroll-snap-align: start; */
   display: flex;
   flex-direction: column;
   justify-content: center;
-
   align-items: center;
   width: 100%;
 }
 
-/* Quote specific styling */
-.quote-section {
-  min-height: 100vh;
-}
-
-.lacan-quote {
-  font-family: var(--font-main);
-  font-size: 1.5rem;
-  max-width: 500px;
-  line-height: 1.4;
-  color: var(--text-color);
-  opacity: 0.9;
-}
-
-.lacan-quote span {
-  display: block;
-  margin-top: 1.5rem;
-  font-size: 1.1rem;
-  opacity: 0.7;
-}
+ /* Moved quote styling to index.css */
 
 /* Navigation List (index page) */
 .nav-list {
@@ -192,66 +171,14 @@ body {
 .nav-list a:hover {
   opacity: 0.6;
   transform: scale(1.01);
-  /* Slight pop effect */
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
-/* Bio / Text specific styling */
-.bio-content p {
-  margin-bottom: 2rem;
-  font-size: 1.5rem;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
-}
+ /* Moved bio content styling to bio.css */
 
-/* Content sections for scrolling (Hardwares/Softwares) */
-.content-section {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  padding-top: 5rem;
-  padding-bottom: 5rem;
-}
+ /* Moved content styling to content.css */
 
-.section-title {
-  font-family: var(--font-main);
-  font-size: 2.0rem;
-  margin-bottom: 2rem;
-  color: var(--text-color);
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-  text-align: left;
-  width: 100%;
-  max-width: 800px;
-}
-
-.section-desc {
-  font-size: 1.2rem;
-  font-family: var(--font-secondary);
-  line-height: 1.8;
-  max-width: 800px;
-  text-align: left;
-  color: #ccc;
-}
-
-.section-desc p {
-  margin-bottom: 1.5rem;
-}
-
-.section-desc ul {
-  margin-bottom: 1.5rem;
-  padding-left: 2rem;
-  text-align: left;
-}
-
-.section-desc p:last-child {
-  margin-bottom: 0;
-}
-
-/* TCC page styling */
-.tcc-content {}
+ /* Moved tcc styling to tcc.css */
 
 /* Page fade-in effect to feel like an SPA */
 body {
