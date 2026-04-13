@@ -35,6 +35,21 @@ body {
   line-height: 1.6;
 }
 
+/* Page fade-in effect to feel like an SPA */
+body {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 /* Header styling */
 .header {
   grid-area: stack;
@@ -150,8 +165,6 @@ body {
   width: 100%;
 }
 
- /* Moved quote styling to index.css */
-
 /* Navigation List (index page) */
 .nav-list {
   list-style: none;
@@ -174,23 +187,56 @@ body {
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
- /* Moved bio content styling to bio.css */
-
- /* Moved content styling to content.css */
-
- /* Moved tcc styling to tcc.css */
-
-/* Page fade-in effect to feel like an SPA */
-body {
-  animation: fadeIn 0.8s ease-out forwards;
+/* Generic content section styles */
+.content-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  width: 100%;
+  padding-top: 8rem;
+  padding-bottom: 5rem;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
+.section-title {
+  font-family: var(--font-main);
+  font-size: 2.0rem;
+  margin-bottom: 2rem;
+  color: var(--text-color);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  text-align: left;
+  width: 100%;
+  max-width: 800px;
+}
 
-  to {
-    opacity: 1;
-  }
+.section-subtitle {
+  font-family: var(--font-main);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+  width: 100%;
+  max-width: 800px;
+}
+
+.section-desc {
+  font-size: 1.2rem;
+  font-family: var(--font-secondary);
+  line-height: 1.8;
+  max-width: 800px;
+  text-align: left;
+  color: #ccc;
+}
+
+.section-desc p {
+  margin-bottom: 1.5rem;
+}
+
+.section-desc ul {
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
+  text-align: left;
+}
+
+.section-desc p:last-child {
+  margin-bottom: 0;
 }
