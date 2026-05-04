@@ -1,0 +1,55 @@
+/* article.css - Styles for text-heavy article pages */
+
+.layout-article {
+  margin-top: 12rem;
+}
+
+/* Generic content section styles */
+.content-section {
+  display: flex;
+  flex-direction: column;
+  align-items: left; /* Note: 'left' is not valid for align-items, flex-start is correct but we'll keep original intent. Actually let's use flex-start */
+  align-items: flex-start;
+  width: 100%;
+  padding-bottom: 4rem;
+}
+
+.section-title {
+  font-family: var(--font-main);
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  text-align: left;
+  width: 100%;
+}
+
+.section-subtitle {
+  font-family: var(--font-main);
+  font-size: 1.7rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+  width: 100%;
+}
+
+.section-desc {
+  font-size: 1.4rem;
+  font-family: var(--font-secondary);
+  line-height: 1.8;
+  text-align: left;
+  color: #ccc;
+}
+
+.section-desc p {
+  margin-bottom: 1.2rem;
+}
+
+.section-desc ul {
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
+  text-align: left;
+}
+
+.section-desc p:last-child {
+  margin-bottom: 0;
+}
