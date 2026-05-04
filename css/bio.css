@@ -8,10 +8,52 @@
   align-items: center;
 }
 
-.bio-content p {
+p, li {
   margin-bottom: 1.5rem;
   font-size: 1.25rem;
   max-width: 400px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.formal-content {
+  /* scroll-snap-align: start; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.my-portrait {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 50px;
+}
+
+.portrait-img {
+  width: 175px;
+  aspect-ratio: 1 / 1.1; /* Establishing a specific ratio */
+  object-fit: cover;
+  object-position: center 100%; /* Shifts the image down to crop more of the top */
+  border: 12px solid #d3d3d3;
+  transform: rotate(-0.8deg);
+  transition: transform 0.3s ease;
+}
+
+.portrait-img:hover {
+  transform: rotate(0deg) scale(1.05);
+  cursor: zoom-in;
+}
+
+.portrait-img.zoomed {
+  z-index: 1000;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.8);
+  cursor: zoom-out;
+}
+
+/* Ensure the parent doesn't clip the zoomed image or backdrop */
+.formal-content, .main-content {
+  overflow: visible !important;
 }

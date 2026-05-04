@@ -17,6 +17,37 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 400);
         });
     });
+
+    // Image Zoom functionality
+    const portraitImg = document.querySelector('.portrait-img');
+    if (portraitImg) {
+        portraitImg.addEventListener('click', () => {
+            const isZoomed = portraitImg.classList.toggle('zoomed');
+            
+            if (isZoomed) {
+                // Calculate distance to center of viewport
+                const rect = portraitImg.getBoundingClientRect();
+                const viewportCenterX = window.innerWidth / 2;
+                const viewportCenterY = window.innerHeight / 2;
+                const imageCenterX = rect.left + (rect.width / 2);
+                const imageCenterY = rect.top + (rect.height / 2);
+                
+                const translateX = viewportCenterX - imageCenterX;
+                const translateY = viewportCenterY - imageCenterY;
+                
+                // Calculate max scale to fit within 90% of viewport
+                const scaleX = (window.innerWidth * 0.9) / rect.width;
+                const scaleY = (window.innerHeight * 0.9) / rect.height;
+                const scale = Math.min(scaleX, scaleY, 4.5); // cap at 4.5x scale
+                
+                // Apply dynamic transform
+                portraitImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+            } else {
+                // Reset to default
+                portraitImg.style.transform = '';
+            }
+        });
+    }
 });
 
 window.addEventListener('pageshow', (event) => {
