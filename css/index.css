@@ -6,22 +6,18 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100%;
   min-height: 100vh;
 }
 
 .lacan-quote {
-  font-family: var(--font-main);
-  font-size: 1.25rem;
-  max-width: 500px;
-  line-height: 1.4;
+  font-family: var(--font-family-main);
+  font-size: var(--text-base);
   color: var(--text-color);
-  opacity: 0.9;
 }
 
 .lacan-quote span {
   display: block;
   margin-top: 1.5rem;
-  font-size: 1.1rem;
-  opacity: 0.7;
+  font-size: var(--text-base);
+  color: var(--text-color-muted);
 }

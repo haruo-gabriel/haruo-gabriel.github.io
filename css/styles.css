@@ -4,10 +4,19 @@
 
 :root {
   --bg-color: #050505;
-  --text-color: #f2f2f2;
-  --text-muted: #a0a0a0;
-  --font-main: 'Special Elite', system-ui;
-  --font-secondary: 'Cormorant', serif;
+  --heading-color: #f7f7f7;
+  --text-color: #e7e7e7;
+  --text-color-muted: #a0a0a0;
+  --font-family-main: 'Special Elite', system-ui;
+  --font-family-secondary: 'Cormorant', serif;
+
+  /* Fluid Typography Scale */
+  --text-sm: clamp(0.875rem, 0.95rem + 0.25vw, 1.125rem);;
+  --text-base: clamp(1rem, 1.05rem + 0.38vw, 1.3125rem);
+  --text-lg: clamp(1.125rem, 1.15rem + 0.5vw, 1.5rem);
+  --text-xl: clamp(1.25rem, 1.35rem + 0.75vw, 1.875rem);
+  --text-2xl: clamp(1.5rem, 1.6rem + 1.38vw, 2.5625rem);
+  --text-3xl: clamp(1.875rem, 1.6rem + 1.38vw, 2.5625rem);
 }
 
 * {
@@ -24,7 +33,9 @@ html {
 body {
   background-color: var(--bg-color);
   color: var(--text-color);
-  font-family: var(--font-main);
+  font-family: var(--font-family-main);
+  font-size: var(--text-base);
+  color: var(--text-color);
   display: grid;
   grid-template-areas: "stack";
   justify-items: center;
@@ -50,6 +61,23 @@ body {
   }
 }
 
+a {
+  color: var(--text-color);
+  text-decoration: underline;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  opacity: 0.6;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+p {
+  font-family: var(--font-family-secondary);
+  font-size: var(--text-base);
+  color: var(--font-color);
+  margin-bottom: 1.0rem;
+}
 
 
 /* Main Content Container */
@@ -64,18 +92,19 @@ body {
   min-height: 100vh;
 }
 
-.nav-section {
-  min-height: 100vh;
-  flex: 1;
-}
+
+
+/* NAVIGATION COMPONENT */
 
 .nav-section {
   /* scroll-snap-align: start; */
+  min-height: 100vh;
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100%;
+  font-style: var(--font-family-main);
 }
 
 /* Navigation List (index page) */
@@ -86,28 +115,21 @@ body {
   gap: 1rem;
 }
 
-.nav-list a {
+.nav-list li {
   color: var(--text-color);
   text-decoration: none;
-  font-size: 1.5rem;
+  font-size: var(--text-base);
   transition: all 0.3s ease;
   display: inline-block;
 }
 
-.nav-list a:hover {
+.nav-list li:hover {
   opacity: 0.6;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
-
-
-a {
-  color: var(--text-color);
-  text-decoration: underline;
-  transition: all 0.3s ease;
+.nav-list a {
+  text-decoration: none;
 }
 
-a:hover {
-  opacity: 0.6;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-}
+
