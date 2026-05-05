@@ -1,6 +1,5 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import "../styles/index.css";
 ---
 
 <BaseLayout title="haruo g.">
@@ -27,3 +26,29 @@ import "../styles/index.css";
 		</p>
 	</section>
 </BaseLayout>
+
+<style>
+/* index.css - Specific styles for the homepage */
+
+.quote-section {
+  /* scroll-snap-align: start; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.lacan-quote {
+  font-family: var(--font-family-main);
+  font-size: var(--text-base);
+  color: var(--text-color);
+}
+
+.lacan-quote span {
+  display: block;
+  margin-top: 1.5rem;
+  font-size: var(--text-base);
+  color: var(--text-color-muted);
+}
+</style>
