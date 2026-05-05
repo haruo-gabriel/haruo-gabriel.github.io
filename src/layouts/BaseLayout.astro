@@ -5,8 +5,8 @@ interface Props {
 
 const { title } = Astro.props;
 
-import { ClientRouter } from 'astro:transitions';
-import Header from '../components/Header.astro';
+import { ClientRouter } from "astro:transitions";
+import Header from "../components/Header.astro";
 import "../styles/styles.css";
 ---
 
@@ -16,9 +16,12 @@ import "../styles/styles.css";
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>{title}</title>
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300..700;1,300..700&family=Special+Elite&display=swap" rel="stylesheet">
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300..700;1,300..700&family=Special+Elite&display=swap"
+			rel="stylesheet"
+		/>
 		<ClientRouter />
 	</head>
 	<body>
