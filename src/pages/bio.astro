@@ -12,11 +12,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 			<p>
 				Graduando em Ciência da Computação pelo IME-USP. Pesquisador em
 				Computação Aplicada à Música. Desenvolvedor de sistemas Web &
-				Desktop. Cheque meu CV <a
-					href="/assets/cv-ptbr.pdf"
-					target="_blank"
-					rel="noopener noreferrer">aqui</a
-				>.
+				Desktop. Cheque meu CV <a href="/cv">aqui</a>.
 			</p>
 			<p>
 				Maker de equipamentos eletrônicos sonoros. Crio, construo e
@@ -74,77 +70,73 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 </BaseLayout>
 
 <style>
-/* bio.css - Specific styles for the bio page */
+	/* bio.css - Specific styles for the bio page */
 
-/* FORMAL CONTENT */
+	/* FORMAL CONTENT */
 
-.formal-content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: left;
-  min-height: 100vh;
-  margin-top: 4rem;
-}
+	.formal-content {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		text-align: left;
+		min-height: 100vh;
+		margin-top: 4rem;
+	}
 
-.formal-content p {
-  font-family: var(--font-family-secondary);
-  font-size: var(--font-size-secondary);
-}
+	.formal-content p {
+		font-family: var(--font-family-secondary);
+		font-size: var(--font-size-secondary);
+	}
 
+	/* PORTRAIT PICTURE */
 
+	.my-portrait {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 50px;
+	}
 
-/* PORTRAIT PICTURE */
+	.portrait-img {
+		width: 175px;
+		aspect-ratio: 1 / 1.1;
+		object-fit: cover;
+		object-position: center 100%;
+		border: 12px solid #d3d3d3;
+		transform: rotate(-0.8deg);
+		transition: transform 0.3s ease;
+	}
 
-.my-portrait {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 50px;
-}
+	.portrait-img:hover {
+		transform: rotate(0deg) scale(1.05);
+		cursor: zoom-in;
+	}
 
-.portrait-img {
-  width: 175px;
-  aspect-ratio: 1 / 1.1;
-  object-fit: cover;
-  object-position: center 100%;
-  border: 12px solid #d3d3d3;
-  transform: rotate(-0.8deg);
-  transition: transform 0.3s ease;
-}
+	.portrait-img.zoomed {
+		z-index: 1000;
+		box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.8);
+		cursor: zoom-out;
+	}
 
-.portrait-img:hover {
-  transform: rotate(0deg) scale(1.05);
-  cursor: zoom-in;
-}
+	/* Ensure the parent doesn't clip the zoomed image or backdrop */
+	.formal-content,
+	.main-content {
+		overflow: visible !important;
+	}
 
-.portrait-img.zoomed {
-  z-index: 1000;
-  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.8);
-  cursor: zoom-out;
-}
+	/* INFORMAL CONTENT */
 
-/* Ensure the parent doesn't clip the zoomed image or backdrop */
-.formal-content,
-.main-content {
-  overflow: visible !important;
-}
+	.informal-content {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
 
-
-
-/* INFORMAL CONTENT */
-
-.informal-content {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.informal-content p,
-li {
-  font-family: var(--font-family-main);
-  font-size: var(--text-base);
-}
+	.informal-content p,
+	li {
+		font-family: var(--font-family-main);
+		font-size: var(--text-base);
+	}
 </style>
