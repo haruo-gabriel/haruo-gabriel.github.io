@@ -1,15 +1,45 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import "../styles/article.css";
 ---
 
 <BaseLayout title="softwares - haruo g.">
-	<div
-		style="display: flex; flex-direction: column; justify-content: center; min-height: 100vh;"
-	>
-		<p
-			style="font-family: var(--font-family-main); font-size: var(--text-base);"
-		>
-			em construção...
-		</p>
+	<div class="layout-article">
+		<section>
+			<h2>Projeto USP Aberta</h2>
+            
+			<p>
+				<strong>USP Aberta</strong> é um projeto promovido pela Pró-Reitoria
+				de Pesquisa e Inovação da Universidade (PRPI) com o intuito de dar
+				visibilidade à produção intelectual da Universidade de São Paulo,
+				difundindo sua especificidade e diversidade através de dados extraídos
+				do currículo Lattes dos docentes.
+			</p>
+			<p>
+				Atualmente (2026), atuo na equipe de desenvolvimento full-stack
+				da plataforma, sendo responsável por extrair, estruturar e
+				metrificar os dados de currículos Lattes dos docentes da USP.
+				Utilizamos um stack composto por Django e PostgreSQL para o
+				backend, Python para análise de dados, Next.js para o frontend,
+				com o design de interface desenvolvido em colaboração com
+				designers da FAU, e Docker para a infraestrutura.
+			</p>
+			<p>
+				Acesse a plataforma pelo <a
+					href="https://uspaberta.ime.usp.br"
+					target="_blank"
+					rel="noopener noreferrer">link</a
+				> ou pelo preview abaixo:
+			</p>
+			<div style="margin-top: 2rem;">
+				<iframe
+					src="https://uspaberta.ime.usp.br"
+					width="100%"
+					style="height: 100vh; border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
+					title="USP Aberta Preview"
+				>
+				</iframe>
+			</div>
+		</section>
 	</div>
 </BaseLayout>
