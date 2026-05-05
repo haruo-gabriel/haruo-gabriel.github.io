@@ -6,8 +6,8 @@ interface Props {
 const { title } = Astro.props;
 
 import { ClientRouter } from 'astro:transitions';
+import Header from '../components/Header.astro';
 import "../styles/styles.css";
-import "../styles/header.css";
 ---
 
 <!doctype html>
@@ -22,9 +22,7 @@ import "../styles/header.css";
 		<ClientRouter />
 	</head>
 	<body>
-		<header class="header">
-			<a href="/">haruo g.</a>
-		</header>
+		<Header />
 
 		<main class="main-content">
 			<slot />
