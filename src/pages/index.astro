@@ -1,22 +1,21 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Nav from "../components/Nav.astro";
+
+const navItems = [
+	{ href: "/bio", text: "bio" },
+	{ href: "/cv", text: "cv" },
+	{ href: "/softwares", text: "softwares" },
+	{ href: "/hardwares", text: "hardwares" },
+	{ href: "/musicas", text: "músicas" },
+	{ href: "/imagens", text: "imagens" },
+	{ href: "/videos", text: "vídeos" },
+	{ href: "/tcc", text: "tcc" },
+];
 ---
 
 <BaseLayout title="haruo g.">
-	<section class="nav-section">
-		<nav>
-			<ul class="nav-list">
-				<li><a href="/bio">bio</a></li>
-				<li><a href="/cv">cv</a></li>
-				<li><a href="/softwares">softwares</a></li>
-				<li><a href="/hardwares">hardwares</a></li>
-				<li><a href="/musicas">músicas</a></li>
-				<li><a href="/imagens">imagens</a></li>
-				<li><a href="/videos">vídeos</a></li>
-				<li><a href="/tcc">tcc</a></li>
-			</ul>
-		</nav>
-	</section>
+	<Nav items={navItems} />
 
 	<section class="quote-section">
 		<p class="lacan-quote">

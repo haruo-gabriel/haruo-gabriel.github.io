@@ -1,0 +1,66 @@
+---
+interface NavItem {
+	href: string;
+	text: string;
+}
+
+interface Props {
+	items: NavItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<section class="nav-section">
+	<nav>
+		<ul class="nav-list">
+			{
+				items.map((item) => (
+					<li>
+						<a href={item.href}>{item.text}</a>
+					</li>
+				))
+			}
+		</ul>
+	</nav>
+</section>
+
+<style>
+	/* NAVIGATION COMPONENT */
+
+	.nav-section {
+		/* scroll-snap-align: start; */
+		min-height: 100vh;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		font-style: var(--font-family-main);
+	}
+
+	/* Navigation List */
+	.nav-list {
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.nav-list li {
+		color: var(--text-color);
+		text-decoration: none;
+		font-size: var(--text-base);
+		transition: all 0.3s ease;
+		display: inline-block;
+	}
+
+	.nav-list li:hover {
+		opacity: 0.6;
+		text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+	}
+
+	.nav-list a {
+		text-decoration: none;
+	}
+</style>
