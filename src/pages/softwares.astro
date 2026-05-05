@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Tags from "../components/Tags.astro";
 import "../styles/article.css";
 ---
 
@@ -7,7 +8,7 @@ import "../styles/article.css";
 	<div class="layout-article">
 		<section>
 			<h2>Projeto USP Aberta</h2>
-            
+			<Tags tags={["software-engineering", "full-stack", "data-engineering", "django", "next.js", "postgresql", "python", "docker"]} />
 			<p>
 				<strong>USP Aberta</strong> é um projeto promovido pela Pró-Reitoria
 				de Pesquisa e Inovação da Universidade (PRPI) com o intuito de dar
