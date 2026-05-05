@@ -1,0 +1,51 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import "../styles/article.css";
+---
+
+<BaseLayout title="cv - haruo g.">
+	<div class="layout-article">
+		<section>
+			<h1>Curriculum Vitae</h1>
+			<p>Veja o meu currículo (em português brasileiro) abaixo.</p>
+			<div class="cv-container">
+				<iframe
+					src="/assets/cv-ptbr.pdf"
+					title="Curriculum Vitae Preview"
+					class="cv-iframe"
+				>
+				</iframe>
+			</div>
+		</section>
+	</div>
+</BaseLayout>
+
+<style>
+	.cv-container {
+		margin-top: 2rem;
+		width: 100%;
+		/* A4 Aspect Ratio: 1 / 1.414 */
+		aspect-ratio: 1 / 1.414;
+		max-width: 900px;
+		margin-left: auto;
+		margin-right: auto;
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+	}
+
+	.cv-iframe {
+		width: 100%;
+		height: 100%;
+		border: none;
+		display: block;
+	}
+
+	@media (max-width: 768px) {
+		.cv-container {
+			aspect-ratio: auto;
+			height: 80vh;
+		}
+	}
+</style>
