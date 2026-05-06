@@ -7,7 +7,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 		<div class="my-portrait">
 			<img src="/assets/eu.jpg" alt="Haruo" class="portrait-img" />
 		</div>
-		<div>
+		<div class="my-description">
 			<p>
 				Gabriel Haruo Hanai Takeuchi. Baseado em São Paulo, SP, Brasil.
 			</p>
@@ -79,13 +79,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 	/* FORMAL CONTENT */
 
 	.formal-content {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		text-align: left;
+		display: grid;
+		grid-template-columns: auto auto;
 		min-height: 100vh;
-		margin-top: 4rem;
 	}
 
 	.formal-content p {
@@ -98,15 +94,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 	.my-portrait {
 		display: flex;
 		justify-content: center;
-		margin-bottom: 50px;
+		align-self: center;
+		margin: 4rem;
 	}
 
 	.portrait-img {
-		width: 175px;
-		aspect-ratio: 1 / 1.1;
-		object-fit: cover;
-		object-position: center 100%;
-		border: 12px solid #d3d3d3;
+		height: 12rem;
 		transform: rotate(-0.8deg);
 		transition: transform 0.3s ease;
 	}
@@ -128,6 +121,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 		overflow: visible !important;
 	}
 
+	/* FORMAL DESCRIPTION */
+
+	.my-description {
+		justify-content: center;
+		align-self: center;
+		text-align: left;
+	}
+
 	/* INFORMAL CONTENT */
 
 	.informal-content {
@@ -142,5 +143,22 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 	li {
 		font-family: var(--font-family-main);
 		font-size: var(--text-base);
+	}
+
+	/* RESPONSIVE DESIGN */
+	@media (orientation: portrait) {
+		.formal-content {
+			grid-template-columns: 1fr;
+			grid-template-rows: auto auto;
+		}
+
+		.my-portrait {
+			align-self: end;
+		}
+
+		.my-description {
+			align-self: start;
+			margin: 0rem;
+		}
 	}
 </style>
