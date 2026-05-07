@@ -38,18 +38,25 @@ jobs:
             echo "manager=yarn" >> $GITHUB_OUTPUT
             echo "command=install" >> $GITHUB_OUTPUT
             echo "runner=yarn" >> $GITHUB_OUTPUT
+            echo "build_script=build" >> $GITHUB_OUTPUT
             echo "lockfile=yarn.lock" >> $GITHUB_OUTPUT
             exit 0
-          elif [ -f "${{ github.workspace }}/bun.lockb" ]; then
+          elif [ -f "${{ github.workspace }}/bun.lockb" ] || [ -f "${{ github.workspace }}/bun.lock" ]; then
             echo "manager=bun" >> $GITHUB_OUTPUT
             echo "command=install" >> $GITHUB_OUTPUT
-            echo "runner=bunx" >> $GITHUB_OUTPUT
-            echo "lockfile=bun.lockb" >> $GITHUB_OUTPUT
+            echo "runner=bun run" >> $GITHUB_OUTPUT
+            echo "build_script=build" >> $GITHUB_OUTPUT
+            if [ -f "${{ github.workspace }}/bun.lockb" ]; then
+              echo "lockfile=bun.lockb" >> $GITHUB_OUTPUT
+            else
+              echo "lockfile=bun.lock" >> $GITHUB_OUTPUT
+            fi
             exit 0
           elif [ -f "${{ github.workspace }}/package.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
             echo "command=ci" >> $GITHUB_OUTPUT
-            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
+            echo "runner=npm run" >> $GITHUB_OUTPUT
+            echo "build_script=build" >> $GITHUB_OUTPUT
             echo "lockfile=package-lock.json" >> $GITHUB_OUTPUT
             exit 0
           else
@@ -68,6 +75,15 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
+      - name: Cache Bun
+        if: steps.detect-package-manager.outputs.manager == 'bun'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
@@ -76,7 +92,7 @@ jobs:
         working-directory: ${{ env.BUILD_PATH }}
       - name: Build with Astro
         run: |
-          ${{ steps.detect-package-manager.outputs.runner }} astro build \
+          ${{ steps.detect-package-manager.outputs.runner }} ${{ steps.detect-package-manager.outputs.build_script }} -- \
             --site "${{ steps.pages.outputs.origin }}" \
             --base "${{ steps.pages.outputs.base_path }}"
         working-directory: ${{ env.BUILD_PATH }}
