@@ -6,39 +6,69 @@ interface Props {
 	cover: ImageMetadata;
 	year: number;
 	tracks: string[];
+	soundcloudUrl: string;
 }
 
-const { title, cover, year, tracks } = Astro.props;
+const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 ---
 
-<article class="album-card">
-	<div class="cover-wrapper">
-		<Image
-			src={cover}
-			alt={`Capa do álbum ${title}`}
-			class="cover-image"
-			width={600}
-			height={600}
-			format="webp"
-			loading="eager"
-		/>
-	</div>
-
-	<div class="content-wrapper">
-		<div class="title-header">
-			<h2 class="album-title">{title}</h2>
-			<span class="album-year">{year}</span>
+<article class="album-card" data-soundcloud-url={soundcloudUrl}>
+	<!-- Card front containing original content -->
+	<div class="card-front">
+		<div class="cover-wrapper">
+			<Image
+				src={cover}
+				alt={`Capa do álbum ${title}`}
+				class="cover-image"
+				width={600}
+				height={600}
+				format="webp"
+				loading="eager"
+			/>
 		</div>
 
-		<ol class="track-list">
-			{
-				tracks.map((track) => (
-					<li class="track-item">
-						<span class="track-name">{track}</span>
-					</li>
-				))
-			}
-		</ol>
+		<div class="content-wrapper">
+			<div class="title-header">
+				<h2 class="album-title">{title}</h2>
+				<span class="album-year">{year}</span>
+			</div>
+
+			<ol class="track-list">
+				{
+					tracks.map((track) => (
+						<li class="track-item">
+							<span class="track-name">{track}</span>
+						</li>
+					))
+				}
+			</ol>
+		</div>
+	</div>
+
+	<!-- Card back containing SoundCloud player, loading spinner, and close button -->
+	<div class="card-back">
+		<div class="loader-container" style="display: none;">
+			<div class="spinner"></div>
+		</div>
+		<button
+			class="close-player-btn"
+			aria-label="Voltar para detalhes do álbum"
+		>
+			<svg
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<line x1="18" y1="6" x2="6" y2="18"></line>
+				<line x1="6" y1="6" x2="18" y2="18"></line>
+			</svg>
+		</button>
+		<div class="iframe-container"></div>
 	</div>
 </article>
 
@@ -67,15 +97,20 @@ const { title, cover, year, tracks } = Astro.props;
 		transition:
 			transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
 			box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		cursor: pointer;
 	}
 
-	.album-card:hover {
-		/* transform: translateY(-6px); */
+	.album-card:hover:not(.active) {
+		transform: translateY(-4px);
 		box-shadow:
 			0 16px 48px rgba(0, 0, 0, 0.45),
 			inset 0 1px 0 rgba(255, 255, 255, 0.65),
 			inset 0 -1px 0 rgba(255, 255, 255, 0.15),
 			inset 0 0 22px 11px rgba(255, 255, 255, 0.08);
+	}
+
+	.album-card.active {
+		cursor: default;
 	}
 
 	/* Metallic shine borders from Header.astro */
@@ -93,6 +128,7 @@ const { title, cover, year, tracks } = Astro.props;
 			transparent
 		);
 		pointer-events: none;
+		z-index: 3;
 	}
 
 	.album-card::after {
@@ -109,6 +145,43 @@ const { title, cover, year, tracks } = Astro.props;
 			rgba(255, 255, 255, 0.3)
 		);
 		pointer-events: none;
+		z-index: 3;
+	}
+
+	/* Card front (static details) */
+	.card-front {
+		opacity: 1;
+		pointer-events: auto;
+		transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		display: flex;
+		flex-direction: column;
+	}
+
+	.album-card.active .card-front {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	/* Card back (embedded player) */
+	.card-back {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		padding: 2rem;
+		padding-top: 3.5rem; /* Room for the close button */
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		display: flex;
+		flex-direction: column;
+		z-index: 2;
+	}
+
+	.album-card.active .card-back {
+		opacity: 1;
+		pointer-events: auto;
 	}
 
 	.cover-wrapper {
@@ -176,7 +249,6 @@ const { title, cover, year, tracks } = Astro.props;
 			color 0.2s ease,
 			transform 0.2s ease,
 			opacity 0.2s ease;
-		cursor: pointer;
 	}
 
 	.track-item::before {
@@ -187,8 +259,188 @@ const { title, cover, year, tracks } = Astro.props;
 		flex-shrink: 0;
 	}
 
-	.track-item:hover {
+	.album-card:not(.active) .track-item:hover {
 		color: var(--heading-color);
 		transform: translateX(4px);
 	}
+
+	/* Close button */
+	.close-player-btn {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		background: rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		color: var(--text-color-muted);
+		border-radius: 50%;
+		width: 34px;
+		height: 34px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		cursor: pointer;
+		z-index: 10;
+		transition:
+			background 0.2s ease,
+			color 0.2s ease,
+			transform 0.2s ease,
+			border-color 0.2s ease;
+	}
+
+	.close-player-btn:hover {
+		background: rgba(255, 255, 255, 0.15);
+		border-color: rgba(255, 255, 255, 0.3);
+		color: var(--heading-color);
+		transform: scale(1.08);
+	}
+
+	.close-player-btn svg {
+		width: 16px;
+		height: 16px;
+	}
+
+	/* Iframe container */
+	.iframe-container {
+		width: 100%;
+		height: 100%;
+		flex-grow: 1;
+		border-radius: 12px;
+		overflow: hidden;
+	}
+
+	/* Loader & Spinner */
+	.loader-container {
+		position: absolute;
+		top: 3.5rem;
+		left: 2rem;
+		right: 2rem;
+		bottom: 2rem;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background: rgba(20, 20, 20, 0.4);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border-radius: 12px;
+		z-index: 4;
+		transition: opacity 0.3s ease;
+	}
+
+	.spinner {
+		width: 36px;
+		height: 36px;
+		border: 3px solid rgba(255, 255, 255, 0.1);
+		border-top-color: #ff5500; /* SoundCloud Orange */
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
 </style>
+
+<script>
+	function setupAlbumCards() {
+		const cards = document.querySelectorAll(".album-card");
+
+		cards.forEach((card) => {
+			// Skip if already initialized
+			if (card.getAttribute("data-initialized") === "true") {
+				return;
+			}
+			card.setAttribute("data-initialized", "true");
+
+			const cardBack = card.querySelector(".card-back");
+			const closeBtn = card.querySelector(".close-player-btn");
+			const iframeContainer = card.querySelector(
+				".iframe-container",
+			) as HTMLElement;
+			const loader = card.querySelector(
+				".loader-container",
+			) as HTMLElement;
+			const soundcloudUrl = card.getAttribute("data-soundcloud-url");
+
+			// Trigger card activation
+			card.addEventListener("click", (e) => {
+				const target = e.target as HTMLElement;
+				// Do not activate if card is already active or if close button is clicked
+				if (
+					card.classList.contains("active") ||
+					target.closest(".close-player-btn")
+				) {
+					return;
+				}
+
+				card.classList.add("active");
+
+				if (soundcloudUrl && iframeContainer) {
+					// Show loader
+					if (loader) {
+						loader.style.display = "flex";
+						loader.style.opacity = "1";
+					}
+
+					// Build clean SoundCloud Player embed URL
+					const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(
+						soundcloudUrl,
+					)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`;
+
+					// Dynamically construct and insert the iframe
+					const iframe = document.createElement("iframe");
+					iframe.src = embedUrl;
+					iframe.width = "100%";
+					iframe.height = "100%";
+					iframe.scrolling = "no";
+					iframe.frameBorder = "no";
+					iframe.allow = "autoplay";
+					iframe.style.border = "none";
+					iframe.style.opacity = "0";
+					iframe.style.transition = "opacity 0.4s ease";
+
+					iframe.onload = () => {
+						// Hide loader
+						if (loader) {
+							loader.style.opacity = "0";
+							setTimeout(() => {
+								loader.style.display = "none";
+							}, 300);
+						}
+						// Fade in iframe
+						iframe.style.opacity = "1";
+					};
+
+					iframeContainer.appendChild(iframe);
+				}
+			});
+
+			// Close player and reset card state
+			if (closeBtn) {
+				closeBtn.addEventListener("click", (e) => {
+					e.stopPropagation();
+
+					card.classList.remove("active");
+
+					// Let transitions complete, then clear iframe & reset loader
+					setTimeout(() => {
+						if (iframeContainer) {
+							iframeContainer.innerHTML = "";
+						}
+						if (loader) {
+							loader.style.display = "none";
+							loader.style.opacity = "0";
+						}
+					}, 400); // Matches transition duration
+				});
+			}
+		});
+	}
+
+	// Initialize on page load
+	setupAlbumCards();
+
+	// Support view transition navigation (Astro swaps content on transitions)
+	document.addEventListener("astro:after-swap", setupAlbumCards);
+</script>
