@@ -1,14 +1,15 @@
 ---
 import ArticleLayout from "../layouts/ArticleLayout.astro";
+import ArticleHeader from "../components/ArticleHeader.astro";
 import AlbumCard from "../components/AlbumCard.astro";
 import { albums } from "../data/albums";
 ---
 
 <ArticleLayout title="músicas - haruo g.">
-		<h1>músicas</h1>
-		<div class="music-container">
-			{albums.map((album) => <AlbumCard {...album} />)}
-		</div>
+	<ArticleHeader title="músicas" />
+	<div class="music-container">
+		{albums.map((album) => <AlbumCard {...album} />)}
+	</div>
 </ArticleLayout>
 
 <style>

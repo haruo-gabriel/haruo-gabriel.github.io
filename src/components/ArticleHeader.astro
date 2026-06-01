@@ -1,0 +1,16 @@
+---
+interface Props {
+	title: string;
+	tags?: string[];
+}
+
+const { title, tags } = Astro.props;
+
+import Tags from "./Tags.astro";
+---
+
+<div class="article-header">
+	<h1>{title}</h1>
+	{tags && <Tags tags={tags} />}
+	<slot />
+</div>

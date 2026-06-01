@@ -1,90 +1,84 @@
 ---
 import ArticleLayout from "../layouts/ArticleLayout.astro";
-import Tags from "../components/Tags.astro";
+import ArticleHeader from "../components/ArticleHeader.astro";
+import ArticleSection from "../components/ArticleSection.astro";
 ---
 
 <ArticleLayout title="hardwares - haruo g.">
-		<h1>hardware</h1>
-		<p>Projetos de sistemas embarcados para áudio </p>
-		<section id="mfx">
-			<h2>Menis Mangione MFX</h2>
-			<Tags
-				tags={[
-					"hardware",
-					"embedded-systems",
-					"cpp",
-					"dsp",
-					"daisy-seed",
-					"guitar-pedal",
-				]}
-			/>
-			<div>
-				<p>
-					O Menis Mangione MFX é um pedal de guitarra digital
-					multi-efeitos feito em colaboração com o Vinícius Fernandes
-					para a Menis (instagram: <a
-						href="https://instagram.com/menis______"
-						target="_blank"
-						rel="noopener noreferrer"
-						>@menis______
-					</a>). A unidade inclui:
-				</p>
-				<ul>
-					<li>uma distorção baseada em wavefolding</li>
-					<li>um redutor de taxa de amostragem</li>
-					<li>um delay com um LFO senoidal no tempo de delay</li>
-				</ul>
-				<p>
-					Essa foi a minha primeira experiência desenvolvendo um pedal
-					de guitarra. Sempre quis montar meus próprios pedais, mas
-					nunca fui muito fã de eletrônica. Quando o Vinícius me
-					perguntou se eu queria aprender a fazer pedais ajudando-o a
-					escrever o código em C++ do Mangione, decidi que finalmente
-					aprenderia o básico. E foi muito mais fácil do que eu
-					pensava, pois acabou não sendo necessário ficar montando
-					circuitos complicados. Fazíamos tudo digitalmente com um
-					daisy seed, e o conhecimento de eletrônica necessário era
-					simples: conectar potenciômetros, LED’s e jacks de áudio em
-					uns pinos no daisy. O resto era escrever código e resgatar
-					os conhecimentos de processamento digital de sinais.
-				</p>
-				<p>
-					Esse projeto tem um valor imensurável pra mim. Foi a
-					primeira vez construindo um produto real, algo que eu
-					poderia tocar. Não era só software rodando no meu
-					computador. O código estava rodando dentro de uma caixinha
-					de metal, e fazia o som da minha guitarra ficar absurdamente
-					<strong>NOJENTO</strong> (no bom sentido).
-				</p>
-				<p>
-					Quando me dei conta de que, com a ajuda de alguns amigos, eu
-					poderia construir esses objetos que sempre quis ter
-					morbidamente desde criança, foi forte demais para ignorar.
-					Desde então, tento sempre estar com pelo menos um projeto
-					desse estilo em andamento. E todos os dias sonho em viver de
-					construir essas coisinhas.
-				</p>
-			</div>
-		</section>
+	<ArticleHeader title="hardware">
+		<p>Projetos de sistemas embarcados para áudio</p>
+	</ArticleHeader>
 
-		<section id="ds">
-			<h2>Menis Tafari DS</h2>
-			<Tags
-				tags={[
-					"hardware",
-					"embedded-systems",
-					"cpp",
-					"dsp",
-					"daisy-seed",
-					"synth",
-					"pcb-layout",
-				]}
-			/>
-			<div class="section-desc">
-				<p>
-					Mais detalhes sobre o Menis Tafari DS serão adicionados
-					aqui.
-				</p>
-			</div>
-		</section>
+	<ArticleSection
+		id="mfx"
+		title="Menis Mangione MFX"
+		tags={[
+			"hardware",
+			"embedded-systems",
+			"cpp",
+			"dsp",
+			"daisy-seed",
+			"guitar-pedal",
+		]}
+	>
+		<p>
+			O Menis Mangione MFX é um pedal de guitarra digital multi-efeitos
+			feito em colaboração com o Vinícius Fernandes para a Menis
+			(instagram: <a
+				href="https://instagram.com/menis______"
+				target="_blank"
+				rel="noopener noreferrer"
+				>@menis______
+			</a>). A unidade inclui:
+		</p>
+		<ul>
+			<li>uma distorção baseada em wavefolding</li>
+			<li>um redutor de taxa de amostragem</li>
+			<li>um delay com um LFO senoidal no tempo de delay</li>
+		</ul>
+		<p>
+			Essa foi a minha primeira experiência desenvolvendo um pedal de
+			guitarra. Sempre quis montar meus próprios pedais, mas nunca fui
+			muito fã de eletrônica. Quando o Vinícius me perguntou se eu queria
+			aprender a fazer pedais ajudando-o a escrever o código em C++ do
+			Mangione, decidi que finalmente aprenderia o básico. E foi muito
+			mais fácil do que eu pensava, pois acabou não sendo necessário ficar
+			montando circuitos complicados. Fazíamos tudo digitalmente com um
+			daisy seed, e o conhecimento de eletrônica necessário era simples:
+			conectar potenciômetros, LED's e jacks de áudio em uns pinos no
+			daisy. O resto era escrever código e resgatar os conhecimentos de
+			processamento digital de sinais.
+		</p>
+		<p>
+			Esse projeto tem um valor imensurável pra mim. Foi a primeira vez
+			construindo um produto real, algo que eu poderia tocar. Não era só
+			software rodando no meu computador. O código estava rodando dentro
+			de uma caixinha de metal, e fazia o som da minha guitarra ficar
+			absurdamente
+			<strong>NOJENTO</strong> (no bom sentido).
+		</p>
+		<p>
+			Quando me dei conta de que, com a ajuda de alguns amigos, eu poderia
+			construir esses objetos que sempre quis ter morbidamente desde
+			criança, foi forte demais para ignorar. Desde então, tento sempre
+			estar com pelo menos um projeto desse estilo em andamento. E todos
+			os dias sonho em viver de construir essas coisinhas.
+		</p>
+	</ArticleSection>
+
+	<ArticleSection
+		id="ds"
+		title="Menis Tafari DS"
+		tags={[
+			"hardware",
+			"embedded-systems",
+			"cpp",
+			"dsp",
+			"daisy-seed",
+			"synth",
+			"pcb-layout",
+		]}
+	>
+		<p>Mais detalhes sobre o Menis Tafari DS serão adicionados aqui.</p>
+	</ArticleSection>
 </ArticleLayout>
