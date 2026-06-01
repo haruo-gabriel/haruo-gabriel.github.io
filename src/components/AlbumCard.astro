@@ -1,17 +1,27 @@
 ---
+import { Image } from "astro:assets";
+
 interface Props {
 	title: string;
-	coverUrl: string;
+	cover: ImageMetadata;
 	year: number;
 	tracks: string[];
 }
 
-const { title, coverUrl, year, tracks } = Astro.props;
+const { title, cover, year, tracks } = Astro.props;
 ---
 
 <article class="album-card">
 	<div class="cover-wrapper">
-		<img src={coverUrl} alt={`Capa do álbum ${title}`} class="cover-image" />
+		<Image
+			src={cover}
+			alt={`Capa do álbum ${title}`}
+			class="cover-image"
+			width={600}
+			height={600}
+			format="webp"
+			loading="eager"
+		/>
 	</div>
 
 	<div class="content-wrapper">
