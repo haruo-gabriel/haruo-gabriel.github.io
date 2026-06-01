@@ -7,6 +7,7 @@ export interface Album {
 	cover: ImageMetadata;
 	year: number;
 	tracks: string[];
+	soundcloudUrl: string;
 }
 
 export const albums: Album[] = [
@@ -17,7 +18,8 @@ export const albums: Album[] = [
 		tracks: [
 			"Encontro/Pouso",
 			"Vislumbre"
-		]
+		],
+		soundcloudUrl: "https://soundcloud.com/haruooo/sets/imensidao"
 	},
 	{
 		title: "à deriva",
@@ -26,7 +28,8 @@ export const albums: Album[] = [
 		tracks: [
 			"à deriva",
 			"todas as flores morrem no outono"
-		]
+		],
+		soundcloudUrl: "https://soundcloud.com/haruooo/sets/a-deriva"
 	},
 	{
 		title: "MicroC Rev4",
@@ -35,6 +38,7 @@ export const albums: Album[] = [
 		tracks: [
 			"Sintomática",
 			"HPPD"
-		]
+		],
+		soundcloudUrl: "https://soundcloud.com/haruooo/sets/microc-rev4"
 	}
 ];
