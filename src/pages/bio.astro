@@ -1,11 +1,13 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { Image } from "astro:assets";
+import myPortrait from "../assets/eu.jpg";
 ---
 
 <BaseLayout title="bio - haruo g.">
 	<section class="formal-content">
 		<div class="my-portrait">
-			<img src="/assets/eu.jpg" alt="Haruo" class="portrait-img" />
+			<Image src={myPortrait} alt="Haruo" class="portrait-img" />
 		</div>
 		<div class="my-description">
 			<p>

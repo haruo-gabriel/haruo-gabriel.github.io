@@ -1,6 +1,7 @@
 ---
 import ArticleLayout from "../layouts/ArticleLayout.astro";
 import ArticleHeader from "../components/ArticleHeader.astro";
+import cvPdf from "../assets/cv-ptbr.pdf";
 ---
 
 <ArticleLayout title="cv - haruo g.">
@@ -10,7 +11,7 @@ import ArticleHeader from "../components/ArticleHeader.astro";
 	<section>
 		<div class="cv-container">
 			<iframe
-				src="/assets/cv-ptbr.pdf"
+				src={cvPdf}
 				title="Curriculum Vitae Preview"
 				class="cv-iframe"
 			>
