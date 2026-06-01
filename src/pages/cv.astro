@@ -1,24 +1,23 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import "../styles/article.css";
+import ArticleLayout from "../layouts/ArticleLayout.astro";
+import ArticleHeader from "../components/ArticleHeader.astro";
 ---
 
-<BaseLayout title="cv - haruo g.">
-	<div class="layout-article">
-		<section>
-			<h1>Curriculum Vitae</h1>
-			<p>Veja o meu currículo (em português brasileiro) abaixo.</p>
-			<div class="cv-container">
-				<iframe
-					src="/assets/cv-ptbr.pdf"
-					title="Curriculum Vitae Preview"
-					class="cv-iframe"
-				>
-				</iframe>
-			</div>
-		</section>
-	</div>
-</BaseLayout>
+<ArticleLayout title="cv - haruo g.">
+	<ArticleHeader title="Curriculum Vitae">
+		<p>Veja o meu currículo (em português brasileiro) abaixo.</p>
+	</ArticleHeader>
+	<section>
+		<div class="cv-container">
+			<iframe
+				src="/assets/cv-ptbr.pdf"
+				title="Curriculum Vitae Preview"
+				class="cv-iframe"
+			>
+			</iframe>
+		</div>
+	</section>
+</ArticleLayout>
 
 <style>
 	.cv-container {

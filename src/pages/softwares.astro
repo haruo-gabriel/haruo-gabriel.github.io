@@ -1,135 +1,129 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import Tags from "../components/Tags.astro";
-import "../styles/article.css";
+import ArticleLayout from "../layouts/ArticleLayout.astro";
+import ArticleHeader from "../components/ArticleHeader.astro";
+import ArticleSection from "../components/ArticleSection.astro";
 ---
 
-<BaseLayout title="softwares - haruo g.">
-	<div class="layout-article">
-		<h1>softwares</h1>
+<ArticleLayout title="softwares - haruo g.">
+	<ArticleHeader title="softwares">
 		<p>
 			Alguns dos projetos recentes de software em que venho trabalhando.
 			Atualmente, foco em desenvolvimento web.
 		</p>
-		<section>
-			<h2>Projeto USP Aberta</h2>
-			<Tags
-				tags={[
-					"software-engineering",
-					"web-development",
-					"full-stack",
-					"data-engineering",
-					"django",
-					"next.js",
-					"postgresql",
-					"python",
-					"docker",
-				]}
-			/>
-			<p>
-				<strong>USP Aberta</strong> é um projeto promovido pela Pró-Reitoria
-				de Pesquisa e Inovação da Universidade (PRPI) com o intuito de dar
-				visibilidade à produção intelectual da Universidade de São Paulo,
-				difundindo sua especificidade e diversidade através de dados extraídos
-				do currículo Lattes dos docentes.
-			</p>
-			<p>
-				Atualmente (2026), atuo na equipe de desenvolvimento full-stack
-				da plataforma, sendo responsável por extrair, estruturar e
-				metrificar os dados de currículos Lattes dos docentes da USP.
-				Utilizamos um stack composto por Django e PostgreSQL para o
-				backend, Python para análise de dados, Next.js para o frontend,
-				com o design de interface desenvolvido em colaboração com
-				designers da FAU, e Docker para a infraestrutura.
-			</p>
-			<p>
-				Acesse a plataforma pelo <a
-					href="https://uspaberta.ime.usp.br"
-					target="_blank"
-					rel="noopener noreferrer">link</a
-				> ou pelo preview abaixo:
-			</p>
-			<div style="margin-top: 2rem; margin-bottom: 2rem;">
-				<iframe
-					src="https://uspaberta.ime.usp.br"
-					width="100%"
-					style="height: 100vh; border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
-					title="USP Aberta Preview"
-				>
-				</iframe>
-			</div>
-		</section>
+	</ArticleHeader>
 
-		<section>
-			<h2>Simple Monitoring Tools (for MPEG-H)</h2>
-			<Tags
-				tags={[
-					"software-engineering",
-					"desktop-app",
-					"audio-coding",
-					"dsp",
-					"cpp",
-					"qt",
-					"python",
-					"darwin",
-				]}
-			/>
-			<p>
-				Trabalhei como Assistente de Pesquisa no <a
-					href="https://www.iis.fraunhofer.de/"
-					target="_blank"
-					rel="noopener noreferrer"
-					>Fraunhofer-Institut für Integrierte Schaltungen IIS</a
-				> dentro do <a
-					href="https://www.iis.fraunhofer.de/de/ff/amm.html"
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					Departamento de Tecnologias de Áudio e Mídia</a
-				> (no mesmo lugar que criaram o MP3!). Era um trabalho presencial,
-				então fui morar na Alemanha por 3 meses. Morei numa cidade chamada
-				Erlangen entre Dezembro de 2025 e Fevereiro de 2026. Foi uma bela
-				oportunidade para conhecer outro país, e também para entender a abordagem
-				europeia de como fazer pesquisa aplicada para a indústria.
-			</p>
-			<p>
-				Desenvolvi o <strong><i>Simple Monitoring Tools</i></strong> (ou <i
-					>SMT</i
-				>), uma aplicação desktop para MacOS desenvolvida em C++, Qt e
-				Python. O software é destinado a operadores de transmissão ao
-				vivo que usam o coded de áudio MPEG-H. É mais uma ferramenta
-				técnica para profissionais que usam os equipamentos <i
-					>MPEG-H compliant</i
-				> do que para o público geral.
-			</p>
-			<p>
-				Na aplicação, é possível checar a saúde de um sinal SDI
-				carregado com uma stream de áudio MPEG-H. Por meio de logs
-				constantes e feedbacks visuais na interface gráfica, o operador
-				é capaz de avaliar atrasos, perda de pacotes e outras falhas com
-				mais facilidade.
-			</p>
-		</section>
+	<ArticleSection
+		title="Projeto USP Aberta"
+		tags={[
+			"software-engineering",
+			"web-development",
+			"full-stack",
+			"data-engineering",
+			"django",
+			"next.js",
+			"postgresql",
+			"python",
+			"docker",
+		]}
+	>
+		<p>
+			<strong>USP Aberta</strong> é um projeto promovido pela Pró-Reitoria de
+			Pesquisa e Inovação da Universidade (PRPI) com o intuito de dar visibilidade
+			à produção intelectual da Universidade de São Paulo, difundindo sua especificidade
+			e diversidade através de dados extraídos do currículo Lattes dos docentes.
+		</p>
+		<p>
+			Atualmente (2026), atuo na equipe de desenvolvimento full-stack da
+			plataforma, sendo responsável por extrair, estruturar e metrificar
+			os dados de currículos Lattes dos docentes da USP. Utilizamos um
+			stack composto por Django e PostgreSQL para o backend, Python para
+			análise de dados, Next.js para o frontend, com o design de interface
+			desenvolvido em colaboração com designers da FAU, e Docker para a
+			infraestrutura.
+		</p>
+		<p>
+			Acesse a plataforma pelo <a
+				href="https://uspaberta.ime.usp.br"
+				target="_blank"
+				rel="noopener noreferrer">link</a
+			> ou pelo preview abaixo:
+		</p>
+		<div style="margin-top: 2rem; margin-bottom: 2rem;">
+			<iframe
+				src="https://uspaberta.ime.usp.br"
+				width="100%"
+				style="height: 100vh; border: none; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
+				title="USP Aberta Preview"
+			>
+			</iframe>
+		</div>
+	</ArticleSection>
 
-		<section>
-			<h2>Este website</h2>
-			<Tags
-				tags={[
-					"software-engineering",
-					"web-development",
-					"fullstack",
-					"astro",
-					"typescript",
-					"github-pages",
-					"github-actions",
-				]}
-			/>
-			<p>
-				<strong>Este website</strong>, que funciona como um portfolio
-				online, é um projeto feito usando a plataforma GitHub Pages. O
-				stack é extremamente simples: Astro + TypesScript + GitHub
-				Actions.
-			</p>
-		</section>
-	</div>
-</BaseLayout>
+	<ArticleSection
+		title="Simple Monitoring Tools (for MPEG-H)"
+		tags={[
+			"software-engineering",
+			"desktop-app",
+			"audio-coding",
+			"dsp",
+			"cpp",
+			"qt",
+			"python",
+			"darwin",
+		]}
+	>
+		<p>
+			Trabalhei como Assistente de Pesquisa no <a
+				href="https://www.iis.fraunhofer.de/"
+				target="_blank"
+				rel="noopener noreferrer"
+				>Fraunhofer-Institut für Integrierte Schaltungen IIS</a
+			> dentro do <a
+				href="https://www.iis.fraunhofer.de/de/ff/amm.html"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				Departamento de Tecnologias de Áudio e Mídia</a
+			> (no mesmo lugar que criaram o MP3!). Era um trabalho presencial, então
+			fui morar na Alemanha por 3 meses. Morei numa cidade chamada Erlangen
+			entre Dezembro de 2025 e Fevereiro de 2026. Foi uma bela oportunidade
+			para conhecer outro país, e também para entender a abordagem europeia
+			de como fazer pesquisa aplicada para a indústria.
+		</p>
+		<p>
+			Desenvolvi o <strong><i>Simple Monitoring Tools</i></strong> (ou <i
+				>SMT</i
+			>), uma aplicação desktop para MacOS desenvolvida em C++, Qt e
+			Python. O software é destinado a operadores de transmissão ao vivo
+			que usam o coded de áudio MPEG-H. É mais uma ferramenta técnica para
+			profissionais que usam os equipamentos <i>MPEG-H compliant</i> do que
+			para o público geral.
+		</p>
+		<p>
+			Na aplicação, é possível checar a saúde de um sinal SDI carregado
+			com uma stream de áudio MPEG-H. Por meio de logs constantes e
+			feedbacks visuais na interface gráfica, o operador é capaz de
+			avaliar atrasos, perda de pacotes e outras falhas com mais
+			facilidade.
+		</p>
+	</ArticleSection>
+
+	<ArticleSection
+		title="Este website"
+		tags={[
+			"software-engineering",
+			"web-development",
+			"fullstack",
+			"astro",
+			"typescript",
+			"github-pages",
+			"github-actions",
+		]}
+	>
+		<p>
+			<strong>Este website</strong>, que funciona como um portfolio
+			online, é um projeto feito usando a plataforma GitHub Pages. O stack
+			é extremamente simples: Astro + TypesScript + GitHub Actions.
+		</p>
+	</ArticleSection>
+</ArticleLayout>
