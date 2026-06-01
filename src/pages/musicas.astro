@@ -6,7 +6,17 @@ import { albums } from "../data/albums";
 ---
 
 <ArticleLayout title="músicas - haruo g.">
-	<ArticleHeader title="músicas" />
+	<ArticleHeader title="músicas">
+		<p>
+			Dê uma ouvida nos projetos solo que lancei. Nenhum desses álbuns
+			está completo, já que produzo só de vez em quando. Mas ainda estão
+			em andamento, vivos, e sem prazo pra serem finalizados.
+		</p>
+		<p>
+			Quer ver outros singles? Acessa meu SoundCloud no ícone aí embaixo
+			da página.
+		</p>
+	</ArticleHeader>
 	<div class="music-container">
 		{albums.map((album) => <AlbumCard {...album} />)}
 	</div>
