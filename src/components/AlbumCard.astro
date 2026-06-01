@@ -85,6 +85,7 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 		border: none;
 		box-shadow: none;
 		cursor: pointer;
+		-webkit-tap-highlight-color: transparent;
 	}
 
 	@media (max-width: 440px) {
@@ -283,6 +284,7 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 		padding: 0;
 		margin: 0;
 		overflow-y: auto;
+		overflow-x: hidden;
 		scrollbar-width: thin;
 	}
 
@@ -446,11 +448,19 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 						iframeContainer &&
 						!iframeContainer.querySelector("iframe")
 					) {
-						const embedUrl =
-							`https://w.soundcloud.com/player/?url=${encodeURIComponent(soundcloudUrl)}` +
-							`&color=%23ff5500&auto_play=false&hide_related=true` +
-							`&show_comments=false&show_user=false&show_reposts=false` +
-							`&show_teaser=false&visual=false`;
+						const baseUrl = "https://w.soundcloud.com/player/";
+						const params = [
+							`url=${encodeURIComponent(soundcloudUrl)}`,
+							"color=%23ff5500",
+							"auto_play=false",
+							"hide_related=true",
+							"show_comments=false",
+							"show_user=false",
+							"show_reposts=false",
+							"show_teaser=false",
+							"visual=false"
+						].join("&");
+						const embedUrl = `${baseUrl}?${params}`;
 
 						const iframe = document.createElement("iframe");
 						iframe.src = embedUrl;
