@@ -400,27 +400,56 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 </style>
 
 <script>
-	function setupAlbumCards() {
-		const cards = document.querySelectorAll(".album-card");
+	function setupAlbumCards(): void {
+		const cards: NodeListOf<Element> =
+			document.querySelectorAll(".album-card");
 
-		cards.forEach((card) => {
+		// Configuration to toggle loading screen
+		const ENABLE_LOADER = false;
+
+		cards.forEach((cardElement: Element) => {
+			const card = cardElement as HTMLElement;
+
 			// Skip if already initialized
 			if (card.getAttribute("data-initialized") === "true") {
 				return;
 			}
 			card.setAttribute("data-initialized", "true");
 
-			const closeBtn = card.querySelector(".close-player-btn");
+			const closeBtn = card.querySelector(
+				".close-player-btn",
+			) as HTMLButtonElement | null;
 			const iframeContainer = card.querySelector(
 				".iframe-container",
-			) as HTMLElement;
+			) as HTMLElement | null;
 			const loader = card.querySelector(
 				".loader-container",
-			) as HTMLElement;
+			) as HTMLElement | null;
 			const soundcloudUrl = card.getAttribute("data-soundcloud-url");
 
+			const showLoader = (): void => {
+				if (!ENABLE_LOADER) return;
+				if (loader) {
+					loader.style.display = "flex";
+					loader.style.opacity = "1";
+				}
+			};
+
+			const hideLoader = (immediate: boolean = false): void => {
+				if (!loader) return;
+				if (immediate) {
+					loader.style.display = "none";
+					loader.style.opacity = "0";
+				} else {
+					loader.style.opacity = "0";
+					setTimeout(() => {
+						loader.style.display = "none";
+					}, 300);
+				}
+			};
+
 			// Trigger card activation (flip)
-			card.addEventListener("click", (e) => {
+			card.addEventListener("click", (e: MouseEvent) => {
 				const target = e.target as HTMLElement;
 				// Do not activate if card is already active or if close button is clicked
 				if (
@@ -433,11 +462,7 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 				card.classList.add("active");
 
 				if (soundcloudUrl && iframeContainer) {
-					// Show loader
-					if (loader) {
-						loader.style.display = "flex";
-						loader.style.opacity = "1";
-					}
+					showLoader();
 
 					// Build clean SoundCloud Player embed URL
 					const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(
@@ -445,28 +470,28 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 					)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`;
 
 					// Dynamically construct and insert the iframe
-					const iframe = document.createElement("iframe");
+					const iframe = document.createElement(
+						"iframe",
+					) as HTMLIFrameElement;
 					iframe.src = embedUrl;
 					iframe.width = "100%";
 					iframe.height = "100%";
-					iframe.scrolling = "no";
-					iframe.frameBorder = "no";
+					iframe.setAttribute("scrolling", "no");
+					iframe.setAttribute("frameborder", "no");
 					iframe.allow = "autoplay";
 					iframe.style.border = "none";
-					iframe.style.opacity = "0";
-					iframe.style.transition = "opacity 0.4s ease";
 
-					iframe.onload = () => {
-						// Hide loader
-						if (loader) {
-							loader.style.opacity = "0";
-							setTimeout(() => {
-								loader.style.display = "none";
-							}, 300);
-						}
-						// Fade in iframe
+					if (ENABLE_LOADER) {
+						iframe.style.opacity = "0";
+						iframe.style.transition = "opacity 0.4s ease";
+
+						iframe.onload = () => {
+							hideLoader();
+							iframe.style.opacity = "1";
+						};
+					} else {
 						iframe.style.opacity = "1";
-					};
+					}
 
 					iframeContainer.appendChild(iframe);
 				}
@@ -474,7 +499,7 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 
 			// Close player and reset card state (flip back)
 			if (closeBtn) {
-				closeBtn.addEventListener("click", (e) => {
+				closeBtn.addEventListener("click", (e: MouseEvent) => {
 					e.stopPropagation();
 
 					card.classList.remove("active");
@@ -484,10 +509,7 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 						if (iframeContainer) {
 							iframeContainer.innerHTML = "";
 						}
-						if (loader) {
-							loader.style.display = "none";
-							loader.style.opacity = "0";
-						}
+						hideLoader(true);
 					}, 800); // Matches rotation transition duration
 				});
 			}
