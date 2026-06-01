@@ -13,77 +13,122 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 ---
 
 <article class="album-card" data-soundcloud-url={soundcloudUrl}>
-	<!-- Card front containing original content -->
-	<div class="card-front">
-		<div class="cover-wrapper">
-			<Image
-				src={cover}
-				alt={`Capa do álbum ${title}`}
-				class="cover-image"
-				width={600}
-				height={600}
-				format="webp"
-				loading="eager"
-			/>
-		</div>
-
-		<div class="content-wrapper">
-			<div class="title-header">
-				<h2 class="album-title">{title}</h2>
-				<span class="album-year">{year}</span>
+	<div class="card-inner">
+		<!-- Card front containing original content -->
+		<div class="card-front">
+			<div class="cover-wrapper">
+				<Image
+					src={cover}
+					alt={`Capa do álbum ${title}`}
+					class="cover-image"
+					width={600}
+					height={600}
+					format="webp"
+					loading="eager"
+				/>
 			</div>
 
-			<ol class="track-list">
-				{
-					tracks.map((track) => (
-						<li class="track-item">
-							<span class="track-name">{track}</span>
-						</li>
-					))
-				}
-			</ol>
-		</div>
-	</div>
+			<div class="content-wrapper">
+				<div class="title-header">
+					<h2 class="album-title">{title}</h2>
+					<span class="album-year">{year}</span>
+				</div>
 
-	<!-- Card back containing SoundCloud player, loading spinner, and close button -->
-	<div class="card-back">
-		<div class="loader-container" style="display: none;">
-			<div class="spinner"></div>
+				<ol class="track-list">
+					{
+						tracks.map((track) => (
+							<li class="track-item">
+								<span class="track-name">{track}</span>
+							</li>
+						))
+					}
+				</ol>
+			</div>
 		</div>
-		<button
-			class="close-player-btn"
-			aria-label="Voltar para detalhes do álbum"
-		>
-			<svg
-				width="24"
-				height="24"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
+
+		<!-- Card back containing SoundCloud player, loading spinner, and close button -->
+		<div class="card-back">
+			<div class="loader-container" style="display: none;">
+				<div class="spinner"></div>
+			</div>
+			<button
+				class="close-player-btn"
+				aria-label="Voltar para detalhes do álbum"
 			>
-				<line x1="18" y1="6" x2="6" y2="18"></line>
-				<line x1="6" y1="6" x2="18" y2="18"></line>
-			</svg>
-		</button>
-		<div class="iframe-container"></div>
+				<svg
+					width="24"
+					height="24"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<line x1="18" y1="6" x2="6" y2="18"></line>
+					<line x1="6" y1="6" x2="18" y2="18"></line>
+				</svg>
+			</button>
+			<div class="iframe-container"></div>
+		</div>
 	</div>
 </article>
 
 <style>
 	.album-card {
-		position: relative;
+		perspective: 1500px;
 		width: 100%;
 		max-width: 400px;
 		margin: 2rem auto;
-		padding: 2rem;
-		border-radius: 20px;
-		overflow: hidden;
-		text-align: left;
+		height: 580px; /* Consistent height to accommodate content & 3D space */
+		background: transparent;
+		border: none;
+		box-shadow: none;
+		cursor: pointer;
+	}
 
-		/* Glassmorphism styling matching Header.astro */
+	@media (max-width: 440px) {
+		.album-card {
+			height: 520px; /* Slightly shorter on mobile devices */
+		}
+	}
+
+	.album-card.active {
+		cursor: default;
+	}
+
+	/* Card inner wrapper that performs the 3D rotation */
+	.card-inner {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		transform-style: preserve-3d;
+		transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	}
+
+	.album-card.active .card-inner {
+		transform: rotateY(180deg);
+	}
+
+	/* Hover lift animation on the entire card structure when not active */
+	.album-card:hover:not(.active) .card-inner {
+		transform: translateY(-6px);
+	}
+
+	/* Front & Back Faces */
+	.card-front,
+	.card-back {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
+		border-radius: 20px;
+		padding: 2rem;
+		overflow: hidden;
+
+		/* Glassmorphism styling moved here */
 		background: rgba(20, 20, 20, 0.6);
 		backdrop-filter: blur(15px);
 		-webkit-backdrop-filter: blur(15px);
@@ -95,26 +140,23 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 			inset 0 0 22px 11px rgba(255, 255, 255, 0.05);
 
 		transition:
-			transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-			box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-		cursor: pointer;
+			box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+			border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 
-	.album-card:hover:not(.active) {
-		transform: translateY(-4px);
+	/* Enhanced shadow on hover for inactive card front */
+	.album-card:hover:not(.active) .card-front {
 		box-shadow:
 			0 16px 48px rgba(0, 0, 0, 0.45),
 			inset 0 1px 0 rgba(255, 255, 255, 0.65),
 			inset 0 -1px 0 rgba(255, 255, 255, 0.15),
 			inset 0 0 22px 11px rgba(255, 255, 255, 0.08);
+		border-color: rgba(255, 255, 255, 0.15);
 	}
 
-	.album-card.active {
-		cursor: default;
-	}
-
-	/* Metallic shine borders from Header.astro */
-	.album-card::before {
+	/* Metallic shine borders for both faces */
+	.card-front::before,
+	.card-back::before {
 		content: "";
 		position: absolute;
 		top: 0;
@@ -131,7 +173,8 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 		z-index: 3;
 	}
 
-	.album-card::after {
+	.card-front::after,
+	.card-back::after {
 		content: "";
 		position: absolute;
 		top: 0;
@@ -148,40 +191,19 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 		z-index: 3;
 	}
 
-	/* Card front (static details) */
 	.card-front {
-		opacity: 1;
-		pointer-events: auto;
-		transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-		display: flex;
-		flex-direction: column;
-	}
-
-	.album-card.active .card-front {
-		opacity: 0;
-		pointer-events: none;
-	}
-
-	/* Card back (embedded player) */
-	.card-back {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		padding: 2rem;
-		padding-top: 3.5rem; /* Room for the close button */
-		opacity: 0;
-		pointer-events: none;
-		transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-		display: flex;
-		flex-direction: column;
 		z-index: 2;
+		transform: rotateY(0deg);
+		display: flex;
+		flex-direction: column;
 	}
 
-	.album-card.active .card-back {
-		opacity: 1;
-		pointer-events: auto;
+	.card-back {
+		z-index: 1;
+		transform: rotateY(180deg);
+		display: flex;
+		flex-direction: column;
+		padding-top: 3.5rem; /* Room for close button */
 	}
 
 	.cover-wrapper {
@@ -204,6 +226,7 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
+		flex-grow: 1;
 	}
 
 	.title-header {
@@ -353,7 +376,6 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 			}
 			card.setAttribute("data-initialized", "true");
 
-			const cardBack = card.querySelector(".card-back");
 			const closeBtn = card.querySelector(".close-player-btn");
 			const iframeContainer = card.querySelector(
 				".iframe-container",
@@ -363,7 +385,7 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 			) as HTMLElement;
 			const soundcloudUrl = card.getAttribute("data-soundcloud-url");
 
-			// Trigger card activation
+			// Trigger card activation (flip)
 			card.addEventListener("click", (e) => {
 				const target = e.target as HTMLElement;
 				// Do not activate if card is already active or if close button is clicked
@@ -416,14 +438,14 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 				}
 			});
 
-			// Close player and reset card state
+			// Close player and reset card state (flip back)
 			if (closeBtn) {
 				closeBtn.addEventListener("click", (e) => {
 					e.stopPropagation();
 
 					card.classList.remove("active");
 
-					// Let transitions complete, then clear iframe & reset loader
+					// Let rotation transition complete (0.8s), then clear iframe & reset loader
 					setTimeout(() => {
 						if (iframeContainer) {
 							iframeContainer.innerHTML = "";
@@ -432,7 +454,7 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 							loader.style.display = "none";
 							loader.style.opacity = "0";
 						}
-					}, 400); // Matches transition duration
+					}, 800); // Matches rotation transition duration
 				});
 			}
 		});
