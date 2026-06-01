@@ -1,11 +1,9 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import ArticleLayout from "../layouts/ArticleLayout.astro";
 import Tags from "../components/Tags.astro";
-import "../styles/article.css";
 ---
 
-<BaseLayout title="tcc - haruo g.">
-	<div class="layout-article">
+<ArticleLayout title="tcc - haruo g.">
 		<section>
 			<h1>[TCC] Contribuição ao projeto open-source plugdata</h1>
 			<Tags tags={["cpp", "plugdata", "pure-data", "juce-framework"]} />
@@ -162,5 +160,4 @@ import "../styles/article.css";
 				</ul>
 			</div>
 		</section>
-	</div>
-</BaseLayout>
+</ArticleLayout>

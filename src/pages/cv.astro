@@ -1,10 +1,8 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import "../styles/article.css";
+import ArticleLayout from "../layouts/ArticleLayout.astro";
 ---
 
-<BaseLayout title="cv - haruo g.">
-	<div class="layout-article">
+<ArticleLayout title="cv - haruo g.">
 		<section>
 			<h1>Curriculum Vitae</h1>
 			<p>Veja o meu currículo (em português brasileiro) abaixo.</p>
@@ -17,8 +15,7 @@ import "../styles/article.css";
 				</iframe>
 			</div>
 		</section>
-	</div>
-</BaseLayout>
+</ArticleLayout>
 
 <style>
 	.cv-container {
