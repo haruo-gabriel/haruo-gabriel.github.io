@@ -129,6 +129,11 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 		transform: rotateY(180deg);
 	}
 
+	/* Bug 1 fix: prevent invisible front face from blocking iframe pointer events */
+	.album-card.active .card-front {
+		pointer-events: none;
+	}
+
 	/* Hover lift animation on the entire card structure when not active */
 	.album-card:hover:not(.active) .card-inner {
 		transform: translateY(-6px);
@@ -401,119 +406,76 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 
 <script>
 	function setupAlbumCards(): void {
-		const cards: NodeListOf<Element> =
-			document.querySelectorAll(".album-card");
+		document
+			.querySelectorAll<HTMLElement>(".album-card")
+			.forEach((card) => {
+				// Skip if already initialized
+				if (card.dataset.initialized === "true") return;
+				card.dataset.initialized = "true";
 
-		// Configuration to toggle loading screen
-		const ENABLE_LOADER = false;
+				const closeBtn =
+					card.querySelector<HTMLButtonElement>(".close-player-btn");
+				const iframeContainer =
+					card.querySelector<HTMLElement>(".iframe-container");
+				const soundcloudUrl = card.dataset.soundcloudUrl;
 
-		cards.forEach((cardElement: Element) => {
-			const card = cardElement as HTMLElement;
+				// Bug 2 fix: track the cleanup timer so it can be cancelled on re-open
+				let cleanupTimer: ReturnType<typeof setTimeout> | null = null;
 
-			// Skip if already initialized
-			if (card.getAttribute("data-initialized") === "true") {
-				return;
-			}
-			card.setAttribute("data-initialized", "true");
-
-			const closeBtn = card.querySelector(
-				".close-player-btn",
-			) as HTMLButtonElement | null;
-			const iframeContainer = card.querySelector(
-				".iframe-container",
-			) as HTMLElement | null;
-			const loader = card.querySelector(
-				".loader-container",
-			) as HTMLElement | null;
-			const soundcloudUrl = card.getAttribute("data-soundcloud-url");
-
-			const showLoader = (): void => {
-				if (!ENABLE_LOADER) return;
-				if (loader) {
-					loader.style.display = "flex";
-					loader.style.opacity = "1";
-				}
-			};
-
-			const hideLoader = (immediate: boolean = false): void => {
-				if (!loader) return;
-				if (immediate) {
-					loader.style.display = "none";
-					loader.style.opacity = "0";
-				} else {
-					loader.style.opacity = "0";
-					setTimeout(() => {
-						loader.style.display = "none";
-					}, 300);
-				}
-			};
-
-			// Trigger card activation (flip)
-			card.addEventListener("click", (e: MouseEvent) => {
-				const target = e.target as HTMLElement;
-				// Do not activate if card is already active or if close button is clicked
-				if (
-					card.classList.contains("active") ||
-					target.closest(".close-player-btn")
-				) {
-					return;
-				}
-
-				card.classList.add("active");
-
-				if (soundcloudUrl && iframeContainer) {
-					showLoader();
-
-					// Build clean SoundCloud Player embed URL
-					const embedUrl = `https://w.soundcloud.com/player/?url=${encodeURIComponent(
-						soundcloudUrl,
-					)}&color=%23ff5500&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false&visual=false`;
-
-					// Dynamically construct and insert the iframe
-					const iframe = document.createElement(
-						"iframe",
-					) as HTMLIFrameElement;
-					iframe.src = embedUrl;
-					iframe.width = "100%";
-					iframe.height = "100%";
-					iframe.setAttribute("scrolling", "no");
-					iframe.setAttribute("frameborder", "no");
-					iframe.allow = "autoplay";
-					iframe.style.border = "none";
-
-					if (ENABLE_LOADER) {
-						iframe.style.opacity = "0";
-						iframe.style.transition = "opacity 0.4s ease";
-
-						iframe.onload = () => {
-							hideLoader();
-							iframe.style.opacity = "1";
-						};
-					} else {
-						iframe.style.opacity = "1";
+				// Flip card open and inject iframe
+				card.addEventListener("click", (e: MouseEvent) => {
+					const target = e.target as HTMLElement;
+					if (
+						card.classList.contains("active") ||
+						target.closest(".close-player-btn")
+					) {
+						return;
 					}
 
-					iframeContainer.appendChild(iframe);
-				}
-			});
+					// Cancel any pending cleanup from a previous close
+					if (cleanupTimer !== null) {
+						clearTimeout(cleanupTimer);
+						cleanupTimer = null;
+					}
 
-			// Close player and reset card state (flip back)
-			if (closeBtn) {
-				closeBtn.addEventListener("click", (e: MouseEvent) => {
+					card.classList.add("active");
+
+					// Only inject if container is empty (guard against duplicates)
+					if (
+						soundcloudUrl &&
+						iframeContainer &&
+						!iframeContainer.querySelector("iframe")
+					) {
+						const embedUrl =
+							`https://w.soundcloud.com/player/?url=${encodeURIComponent(soundcloudUrl)}` +
+							`&color=%23ff5500&auto_play=false&hide_related=true` +
+							`&show_comments=false&show_user=false&show_reposts=false` +
+							`&show_teaser=false&visual=false`;
+
+						const iframe = document.createElement("iframe");
+						iframe.src = embedUrl;
+						iframe.width = "100%";
+						iframe.height = "100%";
+						iframe.setAttribute("scrolling", "no");
+						iframe.setAttribute("frameborder", "no");
+						iframe.allow = "autoplay";
+						iframe.style.border = "none";
+						iframeContainer.appendChild(iframe);
+					}
+				});
+
+				// Flip card closed and schedule iframe cleanup
+				closeBtn?.addEventListener("click", (e: MouseEvent) => {
 					e.stopPropagation();
-
 					card.classList.remove("active");
 
-					// Let rotation transition complete (0.8s), then clear iframe & reset loader
-					setTimeout(() => {
-						if (iframeContainer) {
-							iframeContainer.innerHTML = "";
-						}
-						hideLoader(true);
-					}, 800); // Matches rotation transition duration
+					// Clear iframe after flip-back animation completes (0.8s)
+					cleanupTimer = setTimeout(() => {
+						if (iframeContainer) iframeContainer.innerHTML = "";
+						cleanupTimer = null;
+					}, 800);
 				});
-			}
-		});
+			});
 	}
 
 	// Initialize on page load
