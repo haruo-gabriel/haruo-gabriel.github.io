@@ -1,15 +1,26 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import AlbumCard from "../components/AlbumCard.astro";
+import albums from "../data/albums.json";
+import "../styles/article.css";
 ---
 
 <BaseLayout title="músicas - haruo g.">
-	<div
-		style="display: flex; flex-direction: column; justify-content: center; min-height: 100vh;"
-	>
-		<p
-			style="font-family: var(--font-family-main); font-size: var(--text-base);"
-		>
-			em construção...
-		</p>
+	<div class="layout-article">
+		<h1>músicas</h1>
+		<div class="music-container">
+			{albums.map((album) => <AlbumCard {...album} />)}
+		</div>
 	</div>
 </BaseLayout>
+
+<style>
+	.music-container {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+		width: 100%;
+		justify-items: center;
+		align-content: center;
+		min-height: calc(100vh - 12rem);
+	}
+</style>

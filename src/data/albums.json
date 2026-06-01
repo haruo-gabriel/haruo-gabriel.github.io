@@ -1,0 +1,29 @@
+[
+	{
+		"title": "Imensidão",
+		"coverUrl": "/assets/Imensidao-capa.png",
+		"year": 2024,
+		"tracks": [
+			"Encontro/Pouso",
+			"Vislumbre"
+		]
+	},
+	{
+		"title": "à deriva",
+		"coverUrl": "/assets/a_deriva-capa.png",
+		"year": 2025,
+		"tracks": [
+			"à deriva",
+			"todas as flores morrem no outono"
+		]
+	},
+	{
+		"title": "MicroC Rev4",
+		"coverUrl": "/assets/MicroC_Rev4-capa.png",
+		"year": 2025,
+		"tracks": [
+			"Sintomática",
+			"HPPD"
+		]
+	}
+]
