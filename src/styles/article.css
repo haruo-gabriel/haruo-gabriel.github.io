@@ -1,7 +1,7 @@
 /* article.css - Styles for text-heavy article pages */
 
 .layout-article {
-  margin-top: 10rem;
+  margin-top: 6rem;
   padding-bottom: 4rem;
   display: flex;
   flex-direction: column;
