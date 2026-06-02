@@ -74,7 +74,6 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 		width: 100%;
 		max-width: 400px;
 		margin: 2rem auto;
-		height: 580px; /* Consistent height to accommodate content & 3D space */
 		background: transparent;
 		border: none;
 		box-shadow: none;
@@ -83,9 +82,6 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 	}
 
 	@media (max-width: 440px) {
-		.album-card {
-			height: 520px; /* Slightly shorter on mobile devices */
-		}
 		.card-front,
 		.card-back {
 			padding: 1.25rem;
@@ -112,10 +108,12 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 	}
 
 	/* Card inner wrapper that performs the 3D rotation */
+	/* Grid stacking: both faces share one cell, letting the wrapper grow to fit content */
 	.card-inner {
 		position: relative;
 		width: 100%;
-		height: 100%;
+		display: grid;
+		grid-template-areas: "face";
 		transform-style: preserve-3d;
 		transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 	}
@@ -137,10 +135,8 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 	/* Front & Back Faces */
 	.card-front,
 	.card-back {
-		position: absolute;
-		inset: 0;
+		grid-area: face; /* Stacks both faces in the same grid cell */
 		width: 100%;
-		height: 100%;
 		backface-visibility: hidden;
 		-webkit-backface-visibility: hidden;
 		border-radius: 20px;
@@ -223,6 +219,7 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 		display: flex;
 		flex-direction: column;
 		padding-top: 3.5rem; /* Room for close button */
+		min-height: 380px; /* Prevents iframe side from collapsing when content-less */
 	}
 
 	.cover-wrapper {
@@ -237,6 +234,7 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 	.cover-image {
 		width: 100%;
 		height: 100%;
+		aspect-ratio: 1 / 1;
 		object-fit: cover;
 		transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 	}
@@ -244,7 +242,7 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 	.content-wrapper {
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
+		gap: 1rem;
 		flex-grow: 1;
 	}
 
@@ -323,8 +321,8 @@ const { title, cover, year, tracks, soundcloudUrl } = Astro.props;
 
 	.iframe-container {
 		width: 100%;
-		height: 100%;
 		flex-grow: 1;
+		min-height: 200px; /* Ensures the iframe has room when back face has no intrinsic height */
 		border-radius: 12px;
 		overflow: hidden;
 	}
