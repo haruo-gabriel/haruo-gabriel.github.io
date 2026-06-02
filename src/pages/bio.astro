@@ -7,7 +7,12 @@ import myPortrait from "../assets/eu.jpg";
 <BaseLayout title="bio - haruo g.">
 	<section class="formal-content">
 		<div class="my-portrait">
-			<Image src={myPortrait} alt="Haruo" class="portrait-img" />
+			<Image
+				src={myPortrait}
+				alt="Haruo"
+				class="portrait-img"
+				height={256}
+			/>
 		</div>
 		<div class="my-description">
 			<p>
@@ -98,10 +103,13 @@ import myPortrait from "../assets/eu.jpg";
 		justify-content: center;
 		align-self: center;
 		margin-right: 4rem;
+		height: 16rem; /* Container is the size authority */
 	}
 
 	.portrait-img {
-		height: 16rem;
+		display: block;
+		height: 100%;
+		width: auto;
 		transform: rotate(-1deg);
 		transition: transform 0.3s ease;
 	}
@@ -159,8 +167,12 @@ import myPortrait from "../assets/eu.jpg";
 			margin: 4rem 0rem 2rem 0rem;
 		}
 
-		.portrait-img {
+		.my-portrait {
 			height: 8rem;
+		}
+
+		.portrait-img {
+			height: 100%;
 		}
 
 		.my-description {
