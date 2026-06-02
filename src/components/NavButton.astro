@@ -1,0 +1,106 @@
+---
+interface Props {
+	direction: "prev" | "next";
+	ariaLabel?: string;
+	size?: number;
+	mobileSize?: number;
+}
+
+const {
+	direction,
+	ariaLabel = direction === "prev" ? "Anterior" : "Próxima",
+	size = 50,
+	mobileSize = 40,
+} = Astro.props;
+---
+
+<button
+	class:list={["nav-btn", direction === "prev" ? "nav-prev" : "nav-next"]}
+	style={`--btn-size: ${size}px; --btn-mobile-size: ${mobileSize}px;`}
+	aria-label={ariaLabel}
+>
+	{
+		direction === "prev" ? (
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<polyline points="15 18 9 12 15 6" />
+			</svg>
+		) : (
+			<svg
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<polyline points="9 18 15 12 9 6" />
+			</svg>
+		)
+	}
+</button>
+
+<style>
+	.nav-btn {
+		position: absolute;
+		top: 50%;
+		/* translateY(-50%) is kept: it is layout centering, not an animation */
+		transform: translateY(-50%);
+		width: var(--btn-size, 50px);
+		height: var(--btn-size, 50px);
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		color: var(--text-color-muted);
+		border-radius: 50%;
+		cursor: pointer;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		transition:
+			background 0.2s ease,
+			color 0.2s ease,
+			border-color 0.2s ease;
+		z-index: 1010;
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	.nav-prev {
+		left: 2rem;
+	}
+
+	.nav-next {
+		right: 2rem;
+	}
+
+	.nav-btn:hover {
+		background: rgba(255, 255, 255, 0.15);
+		border-color: rgba(255, 255, 255, 0.3);
+		color: var(--heading-color);
+	}
+
+	.nav-btn svg {
+		width: 24px;
+		height: 24px;
+	}
+
+	@media (max-width: 768px) {
+		.nav-btn {
+			width: var(--btn-mobile-size, 40px);
+			height: var(--btn-mobile-size, 40px);
+		}
+
+		.nav-prev {
+			left: 1rem;
+		}
+
+		.nav-next {
+			right: 1rem;
+		}
+	}
+</style>

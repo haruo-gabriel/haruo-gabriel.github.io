@@ -1,0 +1,87 @@
+---
+interface Props {
+	ariaLabel?: string;
+	size?: number;
+	svgSize?: number;
+	top?: string;
+	right?: string;
+	mobileSize?: number;
+	mobileTop?: string;
+	mobileRight?: string;
+	zIndex?: number;
+}
+
+const {
+	ariaLabel = "Fechar",
+	size = 44,
+	svgSize = 24,
+	top = "2rem",
+	right = "2rem",
+	mobileSize = 40,
+	mobileTop = "1rem",
+	mobileRight = "1rem",
+	zIndex = 1010,
+} = Astro.props;
+---
+
+<button
+	class="close-btn"
+	style={`--btn-size: ${size}px; --btn-svg-size: ${svgSize}px; --btn-top: ${top}; --btn-right: ${right}; --btn-mobile-size: ${mobileSize}px; --btn-mobile-top: ${mobileTop}; --btn-mobile-right: ${mobileRight}; --btn-z-index: ${zIndex};`}
+	aria-label={ariaLabel}
+>
+	<svg
+		viewBox="0 0 24 24"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2"
+		stroke-linecap="round"
+		stroke-linejoin="round"
+	>
+		<line x1="18" y1="6" x2="6" y2="18"></line>
+		<line x1="6" y1="6" x2="18" y2="18"></line>
+	</svg>
+</button>
+
+<style>
+	.close-btn {
+		position: absolute;
+		top: var(--btn-top, 2rem);
+		right: var(--btn-right, 2rem);
+		width: var(--btn-size, 44px);
+		height: var(--btn-size, 44px);
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		color: var(--text-color-muted);
+		border-radius: 50%;
+		cursor: pointer;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		transition:
+			background 0.2s ease,
+			color 0.2s ease,
+			border-color 0.2s ease;
+		z-index: var(--btn-z-index, 1010);
+		-webkit-tap-highlight-color: transparent;
+	}
+
+	.close-btn:hover {
+		background: rgba(255, 255, 255, 0.15);
+		border-color: rgba(255, 255, 255, 0.3);
+		color: var(--heading-color);
+	}
+
+	.close-btn svg {
+		width: var(--btn-svg-size, 24px);
+		height: var(--btn-svg-size, 24px);
+	}
+
+	@media (max-width: 768px) {
+		.close-btn {
+			top: var(--btn-mobile-top, 1rem);
+			right: var(--btn-mobile-right, 1rem);
+			width: var(--btn-mobile-size, 40px);
+			height: var(--btn-mobile-size, 40px);
+		}
+	}
+</style>

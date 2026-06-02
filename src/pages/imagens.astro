@@ -1,6 +1,8 @@
 ---
 import ArticleLayout from "../layouts/ArticleLayout.astro";
 import ArticleHeader from "../components/ArticleHeader.astro";
+import CloseButton from "../components/CloseButton.astro";
+import NavButton from "../components/NavButton.astro";
 import { Image, getImage } from "astro:assets";
 import { visuals } from "../data/visuals";
 
@@ -18,10 +20,10 @@ const processedVisuals = await Promise.all(
 					...image,
 					lightboxUrl: lightboxImg.src,
 				};
-			})
+			}),
 		);
 		return { ...project, images: optimizedImages };
-	})
+	}),
 );
 ---
 
@@ -83,52 +85,9 @@ const processedVisuals = await Promise.all(
 		role="dialog"
 		aria-label="Visualizador de imagem"
 	>
-		<button
-			class="lightbox-btn lightbox-close"
-			aria-label="Fechar visualização"
-		>
-			<svg
-				width="24"
-				height="24"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				><line x1="18" y1="6" x2="6" y2="18"></line><line
-					x1="6"
-					y1="6"
-					x2="18"
-					y2="18"></line></svg
-			>
-		</button>
-		<button class="lightbox-btn lightbox-prev" aria-label="Imagem anterior">
-			<svg
-				width="24"
-				height="24"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				><polyline points="15 18 9 12 15 6"></polyline></svg
-			>
-		</button>
-		<button class="lightbox-btn lightbox-next" aria-label="Próxima imagem">
-			<svg
-				width="24"
-				height="24"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				><polyline points="9 18 15 12 9 6"></polyline></svg
-			>
-		</button>
+		<CloseButton ariaLabel="Fechar visualização" />
+		<NavButton direction="prev" ariaLabel="Imagem anterior" />
+		<NavButton direction="next" ariaLabel="Próxima imagem" />
 		<div class="lightbox-content">
 			<img id="lightbox-img" src="" alt="" />
 			<div id="lightbox-caption" class="lightbox-caption"></div>
@@ -295,85 +254,6 @@ const processedVisuals = await Promise.all(
 		color: var(--heading-color);
 		text-align: center;
 	}
-
-	/* Buttons */
-	.lightbox-btn {
-		position: absolute;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		color: var(--text-color-muted);
-		border-radius: 50%;
-		cursor: pointer;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		transition:
-			background 0.2s ease,
-			color 0.2s ease,
-			transform 0.2s ease,
-			border-color 0.2s ease;
-		z-index: 1010;
-		-webkit-tap-highlight-color: transparent;
-	}
-
-	.lightbox-btn:hover {
-		background: rgba(255, 255, 255, 0.15);
-		border-color: rgba(255, 255, 255, 0.3);
-		color: var(--heading-color);
-		transform: scale(1.1);
-	}
-
-	.lightbox-close {
-		top: 2rem;
-		right: 2rem;
-		width: 44px;
-		height: 44px;
-	}
-
-	.lightbox-prev {
-		left: 2rem;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 50px;
-		height: 50px;
-	}
-
-	.lightbox-next {
-		right: 2rem;
-		top: 50%;
-		transform: translateY(-50%);
-		width: 50px;
-		height: 50px;
-	}
-
-	.lightbox-prev:hover {
-		transform: translateY(-50%) scale(1.1);
-	}
-
-	.lightbox-next:hover {
-		transform: translateY(-50%) scale(1.1);
-	}
-
-	@media (max-width: 768px) {
-		.lightbox-prev {
-			left: 1rem;
-			width: 40px;
-			height: 40px;
-		}
-
-		.lightbox-next {
-			right: 1rem;
-			width: 40px;
-			height: 40px;
-		}
-
-		.lightbox-close {
-			top: 1rem;
-			right: 1rem;
-			width: 40px;
-			height: 40px;
-		}
-	}
 </style>
 
 <script>
@@ -396,13 +276,13 @@ const processedVisuals = await Promise.all(
 			"lightbox-caption",
 		) as HTMLDivElement | null;
 		const closeBtn = lightbox.querySelector(
-			".lightbox-close",
+			".close-btn",
 		) as HTMLButtonElement | null;
 		const prevBtn = lightbox.querySelector(
-			".lightbox-prev",
+			".nav-prev",
 		) as HTMLButtonElement | null;
 		const nextBtn = lightbox.querySelector(
-			".lightbox-next",
+			".nav-next",
 		) as HTMLButtonElement | null;
 
 		if (
