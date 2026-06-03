@@ -4,12 +4,13 @@ import CloseButton from "./CloseButton.astro";
 
 interface Props {
 	title: string;
+	artist: string;
 	cover: ImageMetadata;
 	year: number;
 	soundcloudUrl: string;
 }
 
-const { title, cover, year, soundcloudUrl } = Astro.props;
+const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 ---
 
 <article class="album-card" data-soundcloud-url={soundcloudUrl}>
@@ -35,6 +36,7 @@ const { title, cover, year, soundcloudUrl } = Astro.props;
 					<!-- Glowing dot — visible only while audio is playing -->
 					<span class="now-playing-dot" aria-hidden="true"></span>
 				</div>
+				<span class="album-artist">{artist}</span>
 			</div>
 		</div>
 
@@ -273,7 +275,6 @@ const { title, cover, year, soundcloudUrl } = Astro.props;
 		.content-wrapper {
 			display: flex;
 			flex-direction: column;
-			gap: 1rem;
 			flex-grow: 1;
 		}
 
@@ -296,6 +297,15 @@ const { title, cover, year, soundcloudUrl } = Astro.props;
 			color: var(--text-color-muted);
 			font-style: italic;
 			flex-shrink: 0;
+		}
+
+		.album-artist {
+			font-family: var(--font-family-secondary);
+			font-size: var(--text-base);
+			color: var(--text-color-muted);
+			font-style: italic;
+			margin: 0;
+			text-align: left;
 		}
 
 		/* ── Now-playing dot ────────────────────────────────────────── */

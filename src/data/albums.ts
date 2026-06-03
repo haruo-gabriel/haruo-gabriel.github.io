@@ -4,6 +4,7 @@ import microCCover from "../assets/MicroC_Rev4-capa.png";
 
 export interface Album {
 	title: string;
+	artist: string;
 	cover: ImageMetadata;
 	year: number;
 	tracks: string[];
@@ -13,6 +14,7 @@ export interface Album {
 export const albums: Album[] = [
 	{
 		title: "Imensidão",
+		artist: "haruo g.",
 		cover: imensidaoCover,
 		year: 2024,
 		tracks: [
@@ -23,6 +25,7 @@ export const albums: Album[] = [
 	},
 	{
 		title: "à deriva",
+		artist: "haruo g.",
 		cover: aDerivaCover,
 		year: 2025,
 		tracks: [
@@ -33,6 +36,7 @@ export const albums: Album[] = [
 	},
 	{
 		title: "MicroC Rev4",
+		artist: "haruo g.",
 		cover: microCCover,
 		year: 2025,
 		tracks: [
