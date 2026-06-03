@@ -61,6 +61,9 @@ const processedVisuals = await Promise.all(
 									format="webp"
 									class="gallery-image"
 									loading={index < 2 ? "eager" : "lazy"}
+									fetchpriority={
+										index === 0 ? "high" : "auto"
+									}
 								/>
 								{image.title && (
 									<div class="image-overlay">
@@ -89,7 +92,14 @@ const processedVisuals = await Promise.all(
 		<NavButton direction="prev" ariaLabel="Imagem anterior" />
 		<NavButton direction="next" ariaLabel="Próxima imagem" />
 		<div class="lightbox-content">
-			<img id="lightbox-img" src="" alt="" />
+			<Image
+				id="lightbox-img"
+				src={visuals[0].images[0].src}
+				width={1600}
+				format="webp"
+				alt=""
+				loading="eager"
+			/>
 			<div id="lightbox-caption" class="lightbox-caption"></div>
 		</div>
 	</div>
