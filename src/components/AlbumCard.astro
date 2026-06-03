@@ -374,16 +374,17 @@ const { title, cover, year, soundcloudUrl } = Astro.props;
 			position: relative;
 		}
 
-		/* Hidden audio engine: absolutely positioned, visibility hidden */
+		/* Hidden audio engine: absolutely positioned, visually hidden but active */
 		.iframe-container {
 			position: absolute;
 			top: 0;
 			left: 0;
-			width: 1px;
-			height: 1px;
-			visibility: hidden;
+			width: 10px;
+			height: 10px;
+			opacity: 0;
 			pointer-events: none;
 			overflow: hidden;
+			z-index: -10;
 		}
 
 		/* ── Loader ─────────────────────────────────────────────────── */
@@ -1113,7 +1114,7 @@ const { title, cover, year, soundcloudUrl } = Astro.props;
 		function buildEmbedUrl(soundcloudUrl: string): string {
 			const params = new URLSearchParams({
 				url: soundcloudUrl,
-				color: "%23ff5500",
+				color: "#ff5500",
 				auto_play: "false",
 				hide_related: "true",
 				show_comments: "false",
