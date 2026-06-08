@@ -1,6 +1,6 @@
 ---
-import ArticleLayout from "../layouts/ArticleLayout.astro";
-import ArticleHeader from "../components/ArticleHeader.astro";
+import ArticlesLayout from "../layouts/ArticlesLayout.astro";
+import Article from "../components/Article.astro";
 import CloseButton from "../components/CloseButton.astro";
 import NavButton from "../components/NavButton.astro";
 import { Image, getImage } from "astro:assets";
@@ -27,10 +27,12 @@ const processedVisuals = await Promise.all(
 );
 ---
 
-<ArticleLayout title="imagens - haruo g.">
-	<ArticleHeader title="imagens">
-		<p>Projetos visuais, experimentos gráficos e séries de imagens.</p>
-	</ArticleHeader>
+<ArticlesLayout title="imagens - haruo g.">
+	<Article
+		title="imagens"
+		level={1}
+		description="Projetos visuais, experimentos gráficos e séries de imagens."
+	>
 
 	{
 		processedVisuals.map((project) => (
@@ -103,7 +105,8 @@ const processedVisuals = await Promise.all(
 			<div id="lightbox-caption" class="lightbox-caption"></div>
 		</div>
 	</div>
-</ArticleLayout>
+	</Article>
+</ArticlesLayout>
 
 <style>
 	.project-section {

@@ -1,0 +1,120 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import type { Tag } from "../data/tags";
+import Tags from "./Tags.astro";
+
+interface Props extends HTMLAttributes<"article"> {
+	title: string;
+	description?: string;
+	tags?: Tag[];
+	level?: 1 | 2 | 3 | 4 | 5 | 6;
+}
+
+const { title, description, tags, level = 2, class: className, ...attrs } = Astro.props;
+const Heading = `h${level}` as const;
+---
+
+<article class:list={[`article-item level-${level}`, className]} {...attrs}>
+	{level > 1 && <div class="article-sidebar" />}
+	<header class="article-header">
+		<Heading class="article-title">{title}</Heading>
+		{tags && tags.length > 0 && <Tags tags={tags} />}
+		{description && <p class="article-description">{description}</p>}
+	</header>
+	<div class="article-content">
+		<slot />
+	</div>
+</article>
+
+<style>
+	.article-item {
+		width: 100%;
+	}
+
+	/* Spacing and styles based on hierarchy level */
+	.article-item.level-1 {
+		margin-bottom: 2rem;
+	}
+
+	.article-item.level-1 > .article-header :global(h1) {
+		font-family: var(--font-family-main);
+		font-size: var(--text-2xl);
+		color: var(--text-color);
+		margin-top: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.article-item.level-2 {
+		margin-top: 2rem;
+		margin-bottom: 2rem;
+	}
+
+	.article-item.level-2 > .article-header :global(h2) {
+		font-family: var(--font-family-main);
+		font-size: var(--text-xl);
+		color: var(--text-color);
+		margin-top: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.article-item.level-3 {
+		margin-top: 1.5rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.article-item.level-3 > .article-header :global(h3) {
+		font-family: var(--font-family-main);
+		font-size: var(--text-lg);
+		color: var(--text-color);
+		margin-top: 0.8rem;
+		margin-bottom: 0.8rem;
+	}
+
+	.article-description {
+		font-family: var(--font-family-secondary);
+		font-size: var(--text-base);
+		color: var(--font-color);
+		opacity: 0.9;
+		margin-bottom: 1.5rem;
+		line-height: 1.6;
+	}
+
+	.article-content {
+		margin-top: 1rem;
+	}
+
+	/* Indentation and vertical line for nested article elements */
+	.article-content :global(.article-item) {
+		position: relative;
+		padding-left: 1.5rem;
+	}
+
+	/* Sidebar vertical bar */
+	.article-sidebar {
+		position: absolute;
+		left: 0;
+		top: 0;
+		bottom: 0;
+		width: 2px;
+		background-color: rgba(255, 255, 255, 0.08);
+		transition: background-color 0.3s ease, filter 0.3s ease;
+		z-index: 10;
+	}
+
+	/* Invisible hit-box to make it easier to hover on the thin bar */
+	.article-sidebar::after {
+		content: "";
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: -8px;
+		width: 18px;
+		background: transparent;
+	}
+
+	/* Glow hover effect triggered ONLY when cursor is over the bar (or its hit-box) */
+	.article-sidebar:hover {
+		background-color: rgba(255, 255, 255, 0.45);
+		filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.35));
+	}
+</style>

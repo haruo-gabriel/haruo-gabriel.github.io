@@ -1,13 +1,10 @@
 ---
-import ArticleLayout from "../layouts/ArticleLayout.astro";
-import ArticleHeader from "../components/ArticleHeader.astro";
+import ArticlesLayout from "../layouts/ArticlesLayout.astro";
+import Article from "../components/Article.astro";
 ---
 
-<ArticleLayout title="cv - haruo g.">
-	<ArticleHeader title="Curriculum Vitae">
-		<p>Veja o meu currículo (em português brasileiro) abaixo.</p>
-	</ArticleHeader>
-	<section>
+<ArticlesLayout title="cv - haruo g.">
+	<Article title="Curriculum Vitae" level={1} description="Veja o meu currículo (em português brasileiro) abaixo.">
 		<div class="cv-container">
 			<iframe
 				src="/cv-ptbr.pdf"
@@ -16,8 +13,8 @@ import ArticleHeader from "../components/ArticleHeader.astro";
 			>
 			</iframe>
 		</div>
-	</section>
-</ArticleLayout>
+	</Article>
+</ArticlesLayout>
 
 <style>
 	.cv-container {
