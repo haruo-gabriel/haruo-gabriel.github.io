@@ -1,3 +1,8 @@
+// ─── Constants ─────────────────────────────────────────────────────────────
+
+const PLAYHEAD_RESET_THRESHOLD_MS = 800;
+const REWIND_THRESHOLD_MS = 5000;
+
 // ─── Types ─────────────────────────────────────────────────────────────────
 
 interface ProgressData {
@@ -15,7 +20,16 @@ interface SoundObject {
 	duration?: number;
 }
 
-// ─── Script Singleton ───────────────────────────────────────────
+// ─── Time Formatting Helper ────────────────────────────────────────────────
+
+function formatTime(ms: number): string {
+	const totalSeconds = Math.floor(ms / 1000);
+	const minutes = Math.floor(totalSeconds / 60);
+	const seconds = String(totalSeconds % 60).padStart(2, "0");
+	return `${minutes}:${seconds}`;
+}
+
+// ─── Script Singleton ──────────────────────────────────────────────────────
 
 let _scriptPromise: Promise<void> | null = null;
 
@@ -157,7 +171,7 @@ class PlayerController {
 
 			// Handle SoundCloud caching playback positions across tracks
 			if (this.shouldResetPlayhead) {
-				if (data.currentPosition > 800) {
+				if (data.currentPosition > PLAYHEAD_RESET_THRESHOLD_MS) {
 					this.widget.seekTo(0);
 					return; // Ignore this tick to prevent UI jump
 				}
@@ -193,7 +207,7 @@ class PlayerController {
 			if (this.sounds.length === 0) return;
 			
 			// SoundCloud standard: 5s (5000ms) threshold
-			if (this._currentPositionMs >= 5000) {
+			if (this._currentPositionMs >= REWIND_THRESHOLD_MS) {
 				this.shouldResetPlayhead = true;
 				this._currentPositionMs = 0;
 				this.updateProgress(0, this.durationMs, 0);
@@ -224,7 +238,7 @@ class PlayerController {
 		this.progressBar.addEventListener("keydown", (e: KeyboardEvent) => {
 			if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
 				e.preventDefault();
-				const delta = e.key === "ArrowLeft" ? -5000 : 5000;
+				const delta = e.key === "ArrowLeft" ? -REWIND_THRESHOLD_MS : REWIND_THRESHOLD_MS;
 				const newPos = Math.max(
 					0,
 					Math.min(this.durationMs, this._currentPositionMs + delta),
@@ -262,7 +276,7 @@ class PlayerController {
 		const isLast = this.currentIndex === this.sounds.length - 1;
 
 		// Prev button is disabled on the first track if we are under the 5-second rewind threshold
-		const disablePrev = isFirst && this._currentPositionMs < 5000;
+		const disablePrev = isFirst && this._currentPositionMs < REWIND_THRESHOLD_MS;
 
 		const prevDisabledAttr = this.prevBtn.hasAttribute("disabled");
 		if (disablePrev !== prevDisabledAttr) {
@@ -369,12 +383,8 @@ class PlayerController {
 			String(Math.round(ratio * 100)),
 		);
 
-		const fmt = (ms: number) => {
-			const s = Math.floor(ms / 1000);
-			return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-		};
-		this.timeCur.textContent = fmt(posMs);
-		this.timeTot.textContent = fmt(durMs);
+		this.timeCur.textContent = formatTime(posMs);
+		this.timeTot.textContent = formatTime(durMs);
 	}
 
 	private showError(msg: string): void {
