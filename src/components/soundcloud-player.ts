@@ -53,6 +53,8 @@ class PlayerController {
 	private readonly trackArtist: HTMLElement;
 	private readonly playBtn: HTMLElement;
 	private readonly progressBar: HTMLElement;
+	private readonly nextBtn: HTMLButtonElement;
+	private readonly prevBtn: HTMLButtonElement;
 
 	// State
 	private sounds: SoundObject[] = [];
@@ -80,6 +82,8 @@ class PlayerController {
 		this.trackArtist = back.querySelector<HTMLElement>(".player-track-artist")!;
 		this.playBtn = back.querySelector<HTMLElement>(".player-playpause")!;
 		this.progressBar = back.querySelector<HTMLElement>(".player-progress-bar")!;
+		this.nextBtn = back.querySelector<HTMLButtonElement>(".player-next")!;
+		this.prevBtn = back.querySelector<HTMLButtonElement>(".player-prev")!;
 
 		this.showSpinner(true);
 		this._bindWidgetEvents();
@@ -100,6 +104,7 @@ class PlayerController {
 				if (sounds.length > 0) {
 					this.setActiveTrack(0, sounds[0]);
 					this.updateProgress(0, dur, 0);
+					this.updateNavigationButtons();
 				}
 				this.showSpinner(false);
 			} catch {
@@ -123,9 +128,11 @@ class PlayerController {
 						this._currentPositionMs = 0;
 						this.updateProgress(0, dur, 0);
 						this.setActiveTrack(idx, this.sounds[idx]);
+						this.updateNavigationButtons();
 					} else {
 						this.durationMs = dur;
 						this.setActiveTrack(idx, this.sounds[idx]);
+						this.updateNavigationButtons();
 					}
 				});
 			});
@@ -174,16 +181,18 @@ class PlayerController {
 	private _bindUIEvents(): void {
 		this.playBtn.addEventListener("click", () => this._togglePlay());
 
-		this.cardEl.querySelector(".player-next")!.addEventListener("click", () => {
+		this.nextBtn.addEventListener("click", () => {
 			if (this.sounds.length === 0) return;
-			const nextIndex = (this.currentIndex + 1) % this.sounds.length;
-			this._skipTo(nextIndex);
+			if (this.currentIndex < this.sounds.length - 1) {
+				this._skipTo(this.currentIndex + 1);
+			}
 		});
 
-		this.cardEl.querySelector(".player-prev")!.addEventListener("click", () => {
+		this.prevBtn.addEventListener("click", () => {
 			if (this.sounds.length === 0) return;
-			const prevIndex = (this.currentIndex - 1 + this.sounds.length) % this.sounds.length;
-			this._skipTo(prevIndex);
+			if (this.currentIndex > 0) {
+				this._skipTo(this.currentIndex - 1);
+			}
 		});
 
 		// Click-to-seek on progress bar
@@ -231,7 +240,39 @@ class PlayerController {
 		this.durationMs = this.sounds[index]?.duration || 0;
 		this._currentPositionMs = 0;
 		this.updateProgress(0, this.durationMs, 0);
+		this.updateNavigationButtons();
 		this.widget.skip(index);
+	}
+
+	private updateNavigationButtons(): void {
+		if (this.sounds.length === 0) return;
+
+		const isFirst = this.currentIndex === 0;
+		const isLast = this.currentIndex === this.sounds.length - 1;
+
+		if (isFirst) {
+			this.prevBtn.setAttribute("disabled", "true");
+			this.prevBtn.style.opacity = "0.35";
+			this.prevBtn.style.cursor = "not-allowed";
+			this.prevBtn.style.pointerEvents = "none";
+		} else {
+			this.prevBtn.removeAttribute("disabled");
+			this.prevBtn.style.opacity = "";
+			this.prevBtn.style.cursor = "";
+			this.prevBtn.style.pointerEvents = "";
+		}
+
+		if (isLast) {
+			this.nextBtn.setAttribute("disabled", "true");
+			this.nextBtn.style.opacity = "0.35";
+			this.nextBtn.style.cursor = "not-allowed";
+			this.nextBtn.style.pointerEvents = "none";
+		} else {
+			this.nextBtn.removeAttribute("disabled");
+			this.nextBtn.style.opacity = "";
+			this.nextBtn.style.cursor = "";
+			this.nextBtn.style.pointerEvents = "";
+		}
 	}
 
 	// ─── View Helpers ────────────────────────────────────────────────────────
