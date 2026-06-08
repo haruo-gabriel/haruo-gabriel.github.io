@@ -1,0 +1,97 @@
+---
+interface Props {
+	type: "prev" | "next" | "playpause";
+	ariaLabel?: string;
+}
+
+const { type, ariaLabel } = Astro.props;
+---
+
+<button class={`player-btn player-${type}`} aria-label={ariaLabel}>
+	{
+		type === "prev" && (
+			<svg viewBox="0 0 24 24" fill="currentColor">
+				<polygon points="19,20 9,14 19,8" />
+				<rect x="5" y="10" width="2" height="8" />
+			</svg>
+		)
+	}
+	{
+		type === "next" && (
+			<svg viewBox="0 0 24 24" fill="currentColor">
+				<polygon points="5,8 15,14 5,20" />
+				<rect x="17" y="10" width="2" height="8" />
+			</svg>
+		)
+	}
+	{
+		type === "playpause" && (
+			<>
+				<svg class="icon-play" viewBox="0 0 24 24" fill="currentColor">
+					<polygon points="8,5 19,12 8,19" />
+				</svg>
+				<svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor">
+					<rect x="6" y="5" width="4" height="14" />
+					<rect x="14" y="5" width="4" height="14" />
+				</svg>
+			</>
+		)
+	}
+</button>
+
+<style>
+	.player-btn {
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		color: var(--text-color-muted);
+		cursor: pointer;
+		padding: 0;
+		border-radius: 50%;
+		width: 36px;
+		height: 36px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition:
+			background 0.2s ease,
+			color 0.2s ease,
+			border-color 0.2s ease;
+		-webkit-tap-highlight-color: transparent;
+		user-select: none;
+	}
+
+	.player-btn:hover {
+		background: rgba(255, 255, 255, 0.15);
+		border-color: rgba(255, 255, 255, 0.3);
+		color: var(--heading-color);
+	}
+
+	.player-btn svg {
+		width: 14px;
+		height: 14px;
+	}
+
+	/* Specific sizes for play/pause */
+	.player-playpause {
+		width: 44px;
+		height: 44px;
+	}
+
+	.player-playpause svg {
+		width: 16px;
+		height: 16px;
+	}
+
+	/* Play/Pause state toggling */
+	.player-playpause .icon-pause {
+		display: none;
+	}
+
+	.player-playpause.playing .icon-play {
+		display: none;
+	}
+
+	.player-playpause.playing .icon-pause {
+		display: block;
+	}
+</style>
