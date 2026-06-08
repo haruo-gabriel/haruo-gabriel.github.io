@@ -6,11 +6,30 @@ interface Props {
 }
 
 const { tags } = Astro.props;
+
+// Categorized order from general to specific
+const categoryOrder: Record<string, number> = {
+	domain: 1,
+	tool: 2,
+	project: 3,
+	language: 4,
+};
+
+// Sort tags by category, and secondarily alphabetically by label
+const sortedTags = [...tags].sort((a, b) => {
+	const orderA = categoryOrder[a.category] ?? 99;
+	const orderB = categoryOrder[b.category] ?? 99;
+	
+	if (orderA !== orderB) {
+		return orderA - orderB;
+	}
+	return a.label.localeCompare(b.label);
+});
 ---
 
 <div class="tag-container">
 	{
-		tags.map((tag) => (
+		sortedTags.map((tag) => (
 			<span class={`tag ${tag.cssClass}`} data-category={tag.category}>
 				{tag.label}
 			</span>
