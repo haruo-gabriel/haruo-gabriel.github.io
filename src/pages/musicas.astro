@@ -1,6 +1,6 @@
 ---
-import ArticleLayout from "../layouts/ArticleLayout.astro";
-import ArticleHeader from "../components/ArticleHeader.astro";
+import ArticlesLayout from "../layouts/ArticlesLayout.astro";
+import Article from "../components/Article.astro";
 import AlbumCard from "../components/AlbumCard.astro";
 import { albums } from "../data/albums";
 
@@ -8,8 +8,8 @@ const leftCol = albums.filter((_, i) => i % 2 === 0);
 const rightCol = albums.filter((_, i) => i % 2 === 1);
 ---
 
-<ArticleLayout title="músicas - haruo g.">
-	<ArticleHeader title="músicas">
+<ArticlesLayout title="músicas - haruo g.">
+	<Article title="músicas" level={1}>
 		<p>
 			Dê uma ouvida nos projetos solo que lancei. Nenhum desses álbuns
 			está completo, já que produzo só de vez em quando. Mas ainda estão
@@ -19,16 +19,16 @@ const rightCol = albums.filter((_, i) => i % 2 === 1);
 			Quer ver outros singles? Acessa meu SoundCloud no ícone aí embaixo
 			da página.
 		</p>
-	</ArticleHeader>
-	<div class="music-container">
-		<div class="music-col">
-			{leftCol.map((album) => <AlbumCard {...album} />)}
+		<div class="music-container">
+			<div class="music-col">
+				{leftCol.map((album) => <AlbumCard {...album} />)}
+			</div>
+			<div class="music-col">
+				{rightCol.map((album) => <AlbumCard {...album} />)}
+			</div>
 		</div>
-		<div class="music-col">
-			{rightCol.map((album) => <AlbumCard {...album} />)}
-		</div>
-	</div>
-</ArticleLayout>
+	</Article>
+</ArticlesLayout>
 
 <style>
 	.music-container {

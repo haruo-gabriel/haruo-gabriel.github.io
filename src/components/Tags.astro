@@ -1,11 +1,19 @@
 ---
+import type { Tag } from "../data/tags";
+
 interface Props {
-	tags: string[];
+	tags: Tag[];
 }
 
 const { tags } = Astro.props;
 ---
 
 <div class="tag-container">
-	{tags.map((tag) => <span class="tag">{tag}</span>)}
+	{
+		tags.map((tag) => (
+			<span class={`tag ${tag.cssClass}`} data-category={tag.category}>
+				{tag.label}
+			</span>
+		))
+	}
 </div>

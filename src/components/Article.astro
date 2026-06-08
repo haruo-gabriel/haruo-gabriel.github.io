@@ -1,0 +1,27 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import type { Tag } from "../data/tags";
+import Tags from "./Tags.astro";
+
+interface Props extends HTMLAttributes<"article"> {
+	title: string;
+	description?: string;
+	tags?: Tag[];
+	level?: 1 | 2 | 3 | 4 | 5 | 6;
+}
+
+const { title, description, tags, level = 2, class: className, ...attrs } = Astro.props;
+const Heading = `h${level}` as const;
+---
+
+<article class:list={[`article-item level-${level}`, className]} {...attrs}>
+	{level > 1 && <div class="article-sidebar" />}
+	<header class="article-header">
+		<Heading class="article-title">{title}</Heading>
+		{tags && tags.length > 0 && <Tags tags={tags} />}
+		{description && <p class="article-description">{description}</p>}
+	</header>
+	<div class="article-content">
+		<slot />
+	</div>
+</article>
