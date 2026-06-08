@@ -1,20 +1,5 @@
 // ─── Types ─────────────────────────────────────────────────────────────────
 
-type PlayerStateType =
-	| "idle"
-	| "loading"
-	| "ready"
-	| "playing"
-	| "paused";
-type PlayerEventName =
-	| "ready"
-	| "play"
-	| "pause"
-	| "finish"
-	| "progress"
-	| "seek"
-	| "error";
-
 interface ProgressData {
 	currentPosition: number;
 	relativePosition: number;
@@ -27,9 +12,10 @@ interface SoundObject {
 	user: { username: string };
 	permalink_url: string;
 	access: "playable" | "preview" | "blocked";
+	duration?: number;
 }
 
-// ─── Pattern 1: Script Singleton ───────────────────────────────────────────
+// ─── Script Singleton ───────────────────────────────────────────
 
 let _scriptPromise: Promise<void> | null = null;
 
@@ -48,162 +34,216 @@ function loadWidgetScript(): Promise<void> {
 	return _scriptPromise;
 }
 
-// ─── Pattern 2: WidgetFacade ────────────────────────────────────────────────
+// ─── PlayerController ──────────────────────────────────────────────────────
 
-const SC_EVENTS: Record<PlayerEventName, string> = {
-	ready: "ready",
-	play: "play",
-	pause: "pause",
-	finish: "finish",
-	progress: "playProgress",
-	seek: "seek",
-	error: "error",
-};
+class PlayerController {
+	private readonly widget: any;
+	private readonly cardEl: HTMLElement;
+	
+	// DOM Elements
+	private readonly loader: HTMLElement;
+	private readonly player: HTMLElement;
+	private readonly fill: HTMLElement;
+	private readonly loadFill: HTMLElement;
+	private readonly thumb: HTMLElement;
+	private readonly timeCur: HTMLElement;
+	private readonly timeTot: HTMLElement;
+	private readonly tracklist: HTMLElement;
+	private readonly trackTitle: HTMLElement;
+	private readonly trackArtist: HTMLElement;
+	private readonly playBtn: HTMLElement;
+	private readonly progressBar: HTMLElement;
 
-class WidgetFacade {
-	private w: any;
+	// State
+	private sounds: SoundObject[] = [];
+	private currentIndex = 0;
+	private durationMs = 0;
+	private isPlaying = false;
+	private _currentPositionMs = 0;
+	private shouldResetPlayhead = false;
 
-	constructor(iframe: HTMLIFrameElement) {
-		this.w = (window as any).SC.Widget(iframe);
-	}
-
-	// Commands
-	play() {
-		this.w.play();
-	}
-	pause() {
-		this.w.pause();
-	}
-	next() {
-		this.w.next();
-	}
-	prev() {
-		this.w.prev();
-	}
-	skip(i: number) {
-		this.w.skip(i);
-	}
-	seekTo(ms: number) {
-		this.w.seekTo(ms);
-	}
-
-	// Queries → Promise
-	getSounds(): Promise<SoundObject[]> {
-		return new Promise((r) => this.w.getSounds(r));
-	}
-	getDuration(): Promise<number> {
-		return new Promise((r) => this.w.getDuration(r));
-	}
-	getCurrentSoundIndex(): Promise<number> {
-		return new Promise((r) => this.w.getCurrentSoundIndex(r));
-	}
-
-	// Events
-	on(event: PlayerEventName, handler: (data?: any) => void): void {
-		this.w.bind(SC_EVENTS[event], handler);
-	}
-	off(event: PlayerEventName): void {
-		this.w.unbind(SC_EVENTS[event]);
-	}
-	/** Unbind all listeners. Call only on page navigation. */
-	destroy(): void {
-		(Object.keys(SC_EVENTS) as PlayerEventName[]).forEach((e) =>
-			this.off(e),
-		);
-	}
-}
-
-// ─── Pattern 3: PlayerState (state machine) ─────────────────────────────────
-
-const VALID_TRANSITIONS: Record<PlayerStateType, PlayerStateType[]> = {
-	idle: ["loading"],
-	loading: ["ready", "idle"],
-	ready: ["playing", "paused"],
-	playing: ["paused", "ready"],
-	paused: ["playing", "idle"],
-};
-
-class PlayerState {
-	current: PlayerStateType = "idle";
-	sounds: SoundObject[] = [];
-	currentIndex = 0;
-	durationMs = 0;
-
-	get isPlaying() {
-		return this.current === "playing";
-	}
-
-	transition(next: PlayerStateType): void {
-		if (!VALID_TRANSITIONS[this.current]?.includes(next)) {
-			console.warn(
-				`[PlayerState] Unexpected: ${this.current} → ${next}`,
-			);
-		}
-		this.current = next;
-	}
-}
-
-// ─── Pattern 4a: PlayerView (DOM only) ─────────────────────────────────────
-
-class PlayerView {
-	private cardEl: HTMLElement;
-	private loader: HTMLElement;
-	private player: HTMLElement;
-	private fill: HTMLElement;
-	private loadFill: HTMLElement;
-	private thumb: HTMLElement;
-	private timeCur: HTMLElement;
-	private timeTot: HTMLElement;
-	private tracklist: HTMLElement;
-	private trackTitle: HTMLElement;
-	private trackArtist: HTMLElement;
-	private playBtn: HTMLElement;
-	private progressBar: HTMLElement;
-
-	constructor(cardEl: HTMLElement) {
+	constructor(iframe: HTMLIFrameElement, cardEl: HTMLElement) {
 		this.cardEl = cardEl;
+		this.widget = (window as any).SC.Widget(iframe);
+
+		// Cache DOM Elements
 		const back = cardEl.querySelector<HTMLElement>(".card-back")!;
-		this.loader =
-			back.querySelector<HTMLElement>(".loader-container")!;
-		this.player =
-			back.querySelector<HTMLElement>(".custom-player")!;
-		this.fill = back.querySelector<HTMLElement>(
-			".player-progress-fill",
-		)!;
-		this.loadFill =
-			back.querySelector<HTMLElement>(".player-load-fill")!;
+		this.loader = back.querySelector<HTMLElement>(".loader-container")!;
+		this.player = back.querySelector<HTMLElement>(".custom-player")!;
+		this.fill = back.querySelector<HTMLElement>(".player-progress-fill")!;
+		this.loadFill = back.querySelector<HTMLElement>(".player-load-fill")!;
 		this.thumb = back.querySelector<HTMLElement>(".player-thumb")!;
-		this.timeCur = back.querySelector<HTMLElement>(
-			".player-time-current",
-		)!;
-		this.timeTot =
-			back.querySelector<HTMLElement>(".player-time-total")!;
-		this.tracklist =
-			back.querySelector<HTMLElement>(".player-tracklist")!;
-		this.trackTitle = back.querySelector<HTMLElement>(
-			".player-track-title",
-		)!;
-		this.trackArtist = back.querySelector<HTMLElement>(
-			".player-track-artist",
-		)!;
-		this.playBtn =
-			back.querySelector<HTMLElement>(".player-playpause")!;
-		this.progressBar = back.querySelector<HTMLElement>(
-			".player-progress-bar",
-		)!;
+		this.timeCur = back.querySelector<HTMLElement>(".player-time-current")!;
+		this.timeTot = back.querySelector<HTMLElement>(".player-time-total")!;
+		this.tracklist = back.querySelector<HTMLElement>(".player-tracklist")!;
+		this.trackTitle = back.querySelector<HTMLElement>(".player-track-title")!;
+		this.trackArtist = back.querySelector<HTMLElement>(".player-track-artist")!;
+		this.playBtn = back.querySelector<HTMLElement>(".player-playpause")!;
+		this.progressBar = back.querySelector<HTMLElement>(".player-progress-bar")!;
+
+		this.showSpinner(true);
+		this._bindWidgetEvents();
+		this._bindUIEvents();
 	}
 
-	showSpinner(visible: boolean): void {
+	private _bindWidgetEvents(): void {
+		// Widget loaded — populate tracklist and reveal player
+		this.widget.bind("ready", async () => {
+			try {
+				const [sounds, dur] = await Promise.all([
+					new Promise<SoundObject[]>((r) => this.widget.getSounds(r)),
+					new Promise<number>((r) => this.widget.getDuration(r)),
+				]);
+				this.sounds = sounds;
+				this.durationMs = dur;
+				this.renderTracks();
+				if (sounds.length > 0) {
+					this.setActiveTrack(0, sounds[0]);
+					this.updateProgress(0, dur, 0);
+				}
+				this.showSpinner(false);
+			} catch {
+				this.showError("Erro ao carregar playlist.");
+			}
+		});
+
+		// Track started playing
+		this.widget.bind("play", () => {
+			this.isPlaying = true;
+			this.setPlayIcon(true);
+
+			this.widget.getCurrentSoundIndex((idx: number) => {
+				this.widget.getDuration((dur: number) => {
+					if (!this.isPlaying) return;
+
+					if (idx !== this.currentIndex) {
+						this.shouldResetPlayhead = true;
+						this.currentIndex = idx;
+						this.durationMs = dur;
+						this._currentPositionMs = 0;
+						this.updateProgress(0, dur, 0);
+						this.setActiveTrack(idx, this.sounds[idx]);
+					} else {
+						this.durationMs = dur;
+						this.setActiveTrack(idx, this.sounds[idx]);
+					}
+				});
+			});
+		});
+
+		// Playback paused
+		this.widget.bind("pause", () => {
+			this.isPlaying = false;
+			this.setPlayIcon(false);
+		});
+
+		// Track finished — Widget auto-advances; PLAY fires for next track
+		this.widget.bind("finish", () => {
+			this.isPlaying = false;
+			this.setPlayIcon(false);
+			this.shouldResetPlayhead = true;
+		});
+
+		// Playback progress tick
+		this.widget.bind("playProgress", (data: ProgressData) => {
+			if (!data) return;
+
+			// Handle SoundCloud caching playback positions across tracks
+			if (this.shouldResetPlayhead) {
+				if (data.currentPosition > 800) {
+					this.widget.seekTo(0);
+					return; // Ignore this tick to prevent UI jump
+				}
+				this.shouldResetPlayhead = false;
+			}
+
+			this._currentPositionMs = data.currentPosition;
+			this.updateProgress(
+				data.currentPosition,
+				this.durationMs,
+				data.loadProgress,
+			);
+		});
+
+		// Widget error
+		this.widget.bind("error", () => {
+			this.showError("Esta faixa não está disponível.");
+		});
+	}
+
+	private _bindUIEvents(): void {
+		this.playBtn.addEventListener("click", () => this._togglePlay());
+
+		this.cardEl.querySelector(".player-next")!.addEventListener("click", () => {
+			if (this.sounds.length === 0) return;
+			const nextIndex = (this.currentIndex + 1) % this.sounds.length;
+			this._skipTo(nextIndex);
+		});
+
+		this.cardEl.querySelector(".player-prev")!.addEventListener("click", () => {
+			if (this.sounds.length === 0) return;
+			const prevIndex = (this.currentIndex - 1 + this.sounds.length) % this.sounds.length;
+			this._skipTo(prevIndex);
+		});
+
+		// Click-to-seek on progress bar
+		this.progressBar.addEventListener("click", (e: Event) => {
+			const bar = e.currentTarget as HTMLElement;
+			const rect = bar.getBoundingClientRect();
+			const ratio = Math.max(
+				0,
+				Math.min(
+					1,
+					((e as MouseEvent).clientX - rect.left) / rect.width,
+				),
+			);
+			this.widget.seekTo(ratio * this.durationMs);
+		});
+
+		// Keyboard seek on progress bar (ArrowLeft / ArrowRight)
+		this.progressBar.addEventListener("keydown", (e: KeyboardEvent) => {
+			if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+				e.preventDefault();
+				const delta = e.key === "ArrowLeft" ? -5000 : 5000;
+				const newPos = Math.max(
+					0,
+					Math.min(this.durationMs, this._currentPositionMs + delta),
+				);
+				this.widget.seekTo(newPos);
+				// Optimistically update view for snappy responsiveness
+				this.updateProgress(
+					newPos,
+					this.durationMs,
+					this.sounds.length ? 1 : 0,
+				);
+			}
+		});
+	}
+
+	private _togglePlay(): void {
+		this.isPlaying ? this.widget.pause() : this.widget.play();
+	}
+
+	private _skipTo(index: number): void {
+		if (index === this.currentIndex) return;
+		this.shouldResetPlayhead = true;
+		this.currentIndex = index;
+		this.durationMs = this.sounds[index]?.duration || 0;
+		this._currentPositionMs = 0;
+		this.updateProgress(0, this.durationMs, 0);
+		this.widget.skip(index);
+	}
+
+	// ─── View Helpers ────────────────────────────────────────────────────────
+
+	private showSpinner(visible: boolean): void {
 		this.loader.style.display = visible ? "flex" : "none";
 		if (!visible) this.player.classList.add("visible");
 	}
 
-	renderTracks(
-		sounds: SoundObject[],
-		onSelect: (i: number) => void,
-	): void {
+	private renderTracks(): void {
 		this.tracklist.innerHTML = "";
-		sounds.forEach((s, i) => {
+		this.sounds.forEach((s, i) => {
 			const li = document.createElement("li");
 			li.className = "player-track-item";
 			li.setAttribute("role", "button");
@@ -214,19 +254,19 @@ class PlayerView {
 				li.setAttribute("aria-disabled", "true");
 			}
 			li.addEventListener("click", () => {
-				if (s.access !== "blocked") onSelect(i);
+				if (s.access !== "blocked") this._skipTo(i);
 			});
 			li.addEventListener("keydown", (e: KeyboardEvent) => {
 				if (e.key === "Enter" || e.key === " ") {
 					e.preventDefault();
-					if (s.access !== "blocked") onSelect(i);
+					if (s.access !== "blocked") this._skipTo(i);
 				}
 			});
 			this.tracklist.appendChild(li);
 		});
 	}
 
-	setActiveTrack(index: number, sound: SoundObject): void {
+	private setActiveTrack(index: number, sound: SoundObject): void {
 		this.tracklist
 			.querySelectorAll<HTMLElement>(".player-track-item")
 			.forEach((el, i) => {
@@ -243,7 +283,7 @@ class PlayerView {
 		this.trackArtist.textContent = sound.user.username;
 	}
 
-	setPlayIcon(playing: boolean): void {
+	private setPlayIcon(playing: boolean): void {
 		this.playBtn.setAttribute(
 			"aria-label",
 			playing ? "Pausar" : "Reproduzir",
@@ -253,7 +293,7 @@ class PlayerView {
 		this.cardEl.classList.toggle("playing", playing);
 	}
 
-	updateProgress(
+	private updateProgress(
 		posMs: number,
 		durMs: number,
 		loadRatio: number,
@@ -276,161 +316,18 @@ class PlayerView {
 		this.timeTot.textContent = fmt(durMs);
 	}
 
-	showError(msg: string): void {
+	private showError(msg: string): void {
 		this.showSpinner(false);
 		this.trackTitle.textContent = msg;
 		console.error("[AlbumPlayer]", msg);
 	}
-}
-
-// ─── Pattern 4b: PlayerController (coordinates Facade ↔ State ↔ View) ──────
-
-class PlayerController {
-	private readonly facade: WidgetFacade;
-	private readonly state = new PlayerState();
-	private readonly view: PlayerView;
-	private _currentPositionMs = 0;
-
-	constructor(iframe: HTMLIFrameElement, cardEl: HTMLElement) {
-		this.facade = new WidgetFacade(iframe);
-		this.view = new PlayerView(cardEl);
-		this.state.transition("loading");
-		this._bindWidgetEvents();
-		this._bindUIEvents(cardEl);
-	}
-
-	private _bindWidgetEvents(): void {
-		// Widget loaded — populate tracklist and reveal player
-		this.facade.on("ready", async () => {
-			this.state.transition("ready");
-			try {
-				const [sounds, dur] = await Promise.all([
-					this.facade.getSounds(),
-					this.facade.getDuration(),
-				]);
-				this.state.sounds = sounds;
-				this.state.durationMs = dur;
-				this.view.renderTracks(sounds, (i) => this._skipTo(i));
-				if (sounds.length > 0) {
-					this.view.setActiveTrack(0, sounds[0]);
-					this.view.updateProgress(0, dur, 0);
-				}
-				this.view.showSpinner(false);
-			} catch {
-				this.view.showError("Erro ao carregar playlist.");
-			}
-		});
-
-		// Track started playing
-		this.facade.on("play", async () => {
-			this.state.transition("playing");
-			const [idx, dur] = await Promise.all([
-				this.facade.getCurrentSoundIndex(),
-				this.facade.getDuration(),
-			]);
-			// Guard: state may have changed during await (e.g. rapid pause)
-			if (this.state.current !== "playing") return;
-			this.state.currentIndex = idx;
-			this.state.durationMs = dur;
-			if (this.state.sounds[idx]) {
-				this.view.setActiveTrack(idx, this.state.sounds[idx]);
-			}
-			this.view.setPlayIcon(true);
-		});
-
-		// Playback paused
-		this.facade.on("pause", () => {
-			this.state.transition("paused");
-			this.view.setPlayIcon(false);
-		});
-
-		// Track finished — Widget auto-advances; PLAY fires for next track
-		this.facade.on("finish", () => {
-			this.state.transition("ready");
-			this.view.setPlayIcon(false);
-		});
-
-		// Playback progress tick
-		this.facade.on("progress", (data: ProgressData) => {
-			if (!data) return;
-			this._currentPositionMs = data.currentPosition;
-			this.view.updateProgress(
-				data.currentPosition,
-				this.state.durationMs,
-				data.loadProgress,
-			);
-		});
-
-		// Widget error
-		this.facade.on("error", () => {
-			this.view.showError("Esta faixa não está disponível.");
-		});
-	}
-
-	private _bindUIEvents(cardEl: HTMLElement): void {
-		const back = cardEl.querySelector<HTMLElement>(".card-back")!;
-
-		back.querySelector(".player-playpause")!.addEventListener(
-			"click",
-			() => this._togglePlay(),
-		);
-
-		back.querySelector(".player-next")!.addEventListener("click", () =>
-			this.facade.next(),
-		);
-
-		back.querySelector(".player-prev")!.addEventListener("click", () =>
-			this.facade.prev(),
-		);
-
-		// Click-to-seek on progress bar
-		const progressBar = back.querySelector<HTMLElement>(".player-progress-bar")!;
-		progressBar.addEventListener("click", (e: Event) => {
-			const bar = e.currentTarget as HTMLElement;
-			const rect = bar.getBoundingClientRect();
-			const ratio = Math.max(
-				0,
-				Math.min(
-					1,
-					((e as MouseEvent).clientX - rect.left) / rect.width,
-				),
-			);
-			this.facade.seekTo(ratio * this.state.durationMs);
-		});
-
-		// Keyboard seek on progress bar (ArrowLeft / ArrowRight)
-		progressBar.addEventListener("keydown", (e: KeyboardEvent) => {
-			if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-				e.preventDefault();
-				const delta = e.key === "ArrowLeft" ? -5000 : 5000;
-				const newPos = Math.max(
-					0,
-					Math.min(this.state.durationMs, this._currentPositionMs + delta),
-				);
-				this.facade.seekTo(newPos);
-				// Optimistically update view for snappy responsiveness
-				this.view.updateProgress(
-					newPos,
-					this.state.durationMs,
-					this.state.sounds.length ? 1 : 0,
-				);
-			}
-		});
-	}
-
-	private _togglePlay(): void {
-		this.state.isPlaying ? this.facade.pause() : this.facade.play();
-	}
-
-	private _skipTo(index: number): void {
-		this.facade.skip(index);
-		// Widget fires PLAY after skip → state/view updated in 'play' handler
-	}
 
 	/** Call ONLY on page navigation (astro:before-swap). Not on card close. */
 	destroy(): void {
-		if (this.state.isPlaying) this.facade.pause();
-		this.facade.destroy();
+		if (this.isPlaying) this.widget.pause();
+		["ready", "play", "pause", "finish", "playProgress", "error"].forEach((e) => {
+			this.widget.unbind(e);
+		});
 	}
 }
 
