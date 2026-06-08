@@ -6,7 +6,6 @@ interface Props {
 const { title } = Astro.props;
 
 import BaseLayout from "./BaseLayout.astro";
-import "../styles/article.css";
 ---
 
 <BaseLayout title={title}>
@@ -14,3 +13,49 @@ import "../styles/article.css";
 		<slot />
 	</div>
 </BaseLayout>
+
+<style>
+	.layout-article {
+		margin-top: 6rem;
+		padding-bottom: 4rem;
+		display: flex;
+		flex-direction: column;
+		text-align: left;
+		align-items: left;
+	}
+
+	.layout-article :global(h1) {
+		font-family: var(--font-family-main);
+		font-size: var(--text-2xl);
+		color: var(--text-color);
+		margin-top: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.layout-article :global(h2) {
+		font-family: var(--font-family-main);
+		font-size: var(--text-xl);
+		color: var(--text-color);
+		margin-top: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	.layout-article :global(p) {
+		font-family: var(--font-family-secondary);
+		font-size: var(--text-base);
+		color: var(--font-color);
+		margin-bottom: 1rem;
+	}
+
+	.layout-article :global(ul),
+	.layout-article :global(ol) {
+		margin-bottom: 1rem;
+	}
+
+	.layout-article :global(li) {
+		font-family: var(--font-family-secondary);
+		font-size: var(--text-base);
+		margin-left: 1.5rem;
+		text-align: left;
+	}
+</style>
