@@ -170,6 +170,7 @@ class PlayerController {
 				this.durationMs,
 				data.loadProgress,
 			);
+			this.updateNavigationButtons();
 		});
 
 		// Widget error
@@ -190,8 +191,18 @@ class PlayerController {
 
 		this.prevBtn.addEventListener("click", () => {
 			if (this.sounds.length === 0) return;
-			if (this.currentIndex > 0) {
-				this._skipTo(this.currentIndex - 1);
+			
+			// SoundCloud standard: 5s (5000ms) threshold
+			if (this._currentPositionMs >= 5000) {
+				this.shouldResetPlayhead = true;
+				this._currentPositionMs = 0;
+				this.updateProgress(0, this.durationMs, 0);
+				this.updateNavigationButtons();
+				this.widget.seekTo(0);
+			} else {
+				if (this.currentIndex > 0) {
+					this._skipTo(this.currentIndex - 1);
+				}
 			}
 		});
 
@@ -250,28 +261,37 @@ class PlayerController {
 		const isFirst = this.currentIndex === 0;
 		const isLast = this.currentIndex === this.sounds.length - 1;
 
-		if (isFirst) {
-			this.prevBtn.setAttribute("disabled", "true");
-			this.prevBtn.style.opacity = "0.35";
-			this.prevBtn.style.cursor = "not-allowed";
-			this.prevBtn.style.pointerEvents = "none";
-		} else {
-			this.prevBtn.removeAttribute("disabled");
-			this.prevBtn.style.opacity = "";
-			this.prevBtn.style.cursor = "";
-			this.prevBtn.style.pointerEvents = "";
+		// Prev button is disabled on the first track if we are under the 5-second rewind threshold
+		const disablePrev = isFirst && this._currentPositionMs < 5000;
+
+		const prevDisabledAttr = this.prevBtn.hasAttribute("disabled");
+		if (disablePrev !== prevDisabledAttr) {
+			if (disablePrev) {
+				this.prevBtn.setAttribute("disabled", "true");
+				this.prevBtn.style.opacity = "0.35";
+				this.prevBtn.style.cursor = "not-allowed";
+				this.prevBtn.style.pointerEvents = "none";
+			} else {
+				this.prevBtn.removeAttribute("disabled");
+				this.prevBtn.style.opacity = "";
+				this.prevBtn.style.cursor = "";
+				this.prevBtn.style.pointerEvents = "";
+			}
 		}
 
-		if (isLast) {
-			this.nextBtn.setAttribute("disabled", "true");
-			this.nextBtn.style.opacity = "0.35";
-			this.nextBtn.style.cursor = "not-allowed";
-			this.nextBtn.style.pointerEvents = "none";
-		} else {
-			this.nextBtn.removeAttribute("disabled");
-			this.nextBtn.style.opacity = "";
-			this.nextBtn.style.cursor = "";
-			this.nextBtn.style.pointerEvents = "";
+		const nextDisabledAttr = this.nextBtn.hasAttribute("disabled");
+		if (isLast !== nextDisabledAttr) {
+			if (isLast) {
+				this.nextBtn.setAttribute("disabled", "true");
+				this.nextBtn.style.opacity = "0.35";
+				this.nextBtn.style.cursor = "not-allowed";
+				this.nextBtn.style.pointerEvents = "none";
+			} else {
+				this.nextBtn.removeAttribute("disabled");
+				this.nextBtn.style.opacity = "";
+				this.nextBtn.style.cursor = "";
+				this.nextBtn.style.pointerEvents = "";
+			}
 		}
 	}
 
