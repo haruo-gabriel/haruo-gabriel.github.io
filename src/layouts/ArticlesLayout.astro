@@ -21,27 +21,8 @@ import BaseLayout from "./BaseLayout.astro";
 		display: flex;
 		flex-direction: column;
 		text-align: left;
-		align-items: left;
+		align-items: stretch;
+		width: 100%;
 	}
 
-
-
-	.layout-article :global(p) {
-		font-family: var(--font-family-secondary);
-		font-size: var(--text-base);
-		color: var(--font-color);
-		margin-bottom: 1rem;
-	}
-
-	.layout-article :global(ul),
-	.layout-article :global(ol) {
-		margin-bottom: 1rem;
-	}
-
-	.layout-article :global(li) {
-		font-family: var(--font-family-secondary);
-		font-size: var(--text-base);
-		margin-left: 1.5rem;
-		text-align: left;
-	}
 </style>

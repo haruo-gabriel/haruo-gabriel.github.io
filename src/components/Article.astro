@@ -117,4 +117,25 @@ const Heading = `h${level}` as const;
 		background-color: rgba(255, 255, 255, 0.45);
 		filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.35));
 	}
+
+	/* Scoped typography copy styles */
+	.article-content > :global(p) {
+		font-family: var(--font-family-secondary);
+		font-size: var(--text-base);
+		color: var(--font-color);
+		margin-bottom: 1rem;
+	}
+
+	.article-content > :global(ul),
+	.article-content > :global(ol) {
+		margin-bottom: 1rem;
+	}
+
+	.article-content > :global(ul) > :global(li),
+	.article-content > :global(ol) > :global(li) {
+		font-family: var(--font-family-secondary);
+		font-size: var(--text-base);
+		margin-left: 1.5rem;
+		text-align: left;
+	}
 </style>

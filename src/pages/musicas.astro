@@ -3,9 +3,6 @@ import ArticlesLayout from "../layouts/ArticlesLayout.astro";
 import Article from "../components/Article.astro";
 import AlbumCard from "../components/AlbumCard.astro";
 import { albums } from "../data/albums";
-
-const leftCol = albums.filter((_, i) => i % 2 === 0);
-const rightCol = albums.filter((_, i) => i % 2 === 1);
 ---
 
 <ArticlesLayout title="músicas - haruo g.">
@@ -19,35 +16,22 @@ const rightCol = albums.filter((_, i) => i % 2 === 1);
 			Quer ver outros singles? Acessa meu SoundCloud no ícone aí embaixo
 			da página.
 		</p>
-		<div class="music-container">
-			<div class="music-col">
-				{leftCol.map((album) => <AlbumCard {...album} />)}
-			</div>
-			<div class="music-col">
-				{rightCol.map((album) => <AlbumCard {...album} />)}
-			</div>
+		<div class="albums-grid">
+			{albums.map((album) => <AlbumCard {...album} />)}
 		</div>
 	</Article>
 </ArticlesLayout>
 
 <style>
-	.music-container {
-		display: flex;
-		gap: 0rem;
-		align-items: flex-start;
+	.albums-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
 		width: 100%;
 	}
 
-	.music-col {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		gap: 0rem;
-	}
-
 	@media (max-width: 768px) {
-		.music-container {
-			flex-direction: column;
+		.albums-grid {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>
