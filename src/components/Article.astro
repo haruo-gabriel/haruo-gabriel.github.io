@@ -36,7 +36,7 @@ const Heading = `h${level}` as const;
 		margin-bottom: 2rem;
 	}
 
-	.article-item.level-1 > .article-header :global(h1) {
+	.article-item.level-1 > .article-header > .article-title {
 		font-family: var(--font-family-main);
 		font-size: var(--text-2xl);
 		color: var(--text-color);
@@ -49,7 +49,7 @@ const Heading = `h${level}` as const;
 		margin-bottom: 2rem;
 	}
 
-	.article-item.level-2 > .article-header :global(h2) {
+	.article-item.level-2 > .article-header > .article-title {
 		font-family: var(--font-family-main);
 		font-size: var(--text-xl);
 		color: var(--text-color);
@@ -62,7 +62,7 @@ const Heading = `h${level}` as const;
 		margin-bottom: 1.5rem;
 	}
 
-	.article-item.level-3 > .article-header :global(h3) {
+	.article-item.level-3 > .article-header > .article-title {
 		font-family: var(--font-family-main);
 		font-size: var(--text-lg);
 		color: var(--text-color);
