@@ -177,7 +177,10 @@ const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 			-webkit-backface-visibility: hidden;
 			border-radius: 20px;
 			padding: 2rem;
-			overflow: hidden;
+			/* IMPORTANT: Do NOT add overflow:hidden or clip-path here.
+			   Both create a stacking context that flattens preserve-3d —
+			   overflow:hidden breaks iOS Safari, clip-path breaks Firefox.
+			   Content clipping is handled by inner wrappers instead. */
 			background: rgba(20, 20, 20, 0.6);
 			backdrop-filter: blur(15px);
 			-webkit-backdrop-filter: blur(15px);
@@ -252,6 +255,8 @@ const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 			width: 100%;
 			aspect-ratio: 1 / 1;
 			border-radius: 16px;
+			/* overflow:hidden is safe here — .cover-wrapper is a grandchild
+			   of preserve-3d, not a direct child, so it does not flatten 3D. */
 			overflow: hidden;
 			margin-bottom: 2rem;
 			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
