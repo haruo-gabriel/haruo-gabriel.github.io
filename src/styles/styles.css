@@ -61,7 +61,7 @@ body {
 a {
   color: var(--text-color);
   text-decoration: underline;
-  transition: all 0.3s ease;
+  transition: opacity 0.3s ease, text-shadow 0.3s ease;
 }
 
 a:hover {
