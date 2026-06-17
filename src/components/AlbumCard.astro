@@ -1,6 +1,5 @@
 ---
 import { Image } from "astro:assets";
-import CloseButton from "./CloseButton.astro";
 import PlayerButton from "./PlayerButton.astro";
 
 interface Props {
@@ -9,178 +8,115 @@ interface Props {
 	cover: ImageMetadata;
 	year: number;
 	soundcloudUrl: string;
+	loading?: "eager" | "lazy";
 }
 
-const { title, artist, cover, year, soundcloudUrl } = Astro.props;
+const { title, artist, cover, year, soundcloudUrl, loading = "lazy" } = Astro.props;
 ---
 
 <article class="album-card" data-soundcloud-url={soundcloudUrl}>
-	<div class="card-inner">
-		<!-- ─── FRONT ──────────────────────────────────────────── -->
-		<div class="card-front">
-			<div class="cover-wrapper">
-				<Image
-					src={cover}
-					alt={`Capa do álbum ${title}`}
-					class="cover-image"
-					width={600}
-					height={600}
-					format="webp"
-					loading="eager"
-				/>
-			</div>
-
-			<div class="content-wrapper">
-				<div class="title-header">
-					<h2 class="album-title">{title}</h2>
-					<span class="album-year">{year}</span>
-					<!-- Glowing dot — visible only while audio is playing -->
-					<span class="now-playing-dot" aria-hidden="true"></span>
-				</div>
-				<span class="album-artist">{artist}</span>
-			</div>
+	<!-- ─── HEADER (clickable toggle) ──────────────────────── -->
+	<div class="card-header">
+		<div class="cover-wrapper">
+			<Image
+				src={cover}
+				alt={`Capa do álbum ${title}`}
+				class="cover-image"
+				width={600}
+				height={600}
+				format="webp"
+				loading={loading}
+			/>
 		</div>
 
-		<!-- ─── BACK ───────────────────────────────────────────── -->
-		<div class="card-back">
-			<!-- Hidden audio engine — persists independently of card face -->
-			<div class="iframe-container" aria-hidden="true"></div>
+		<div class="content-wrapper">
+			<div class="title-header">
+				<h2 class="album-title">{title}</h2>
+				<span class="album-year">{year}</span>
+				<!-- Glowing dot — visible only while audio is playing -->
+				<span class="now-playing-dot" aria-hidden="true"></span>
+			</div>
+			<span class="album-artist">{artist}</span>
+		</div>
+	</div>
 
-			<CloseButton
-				ariaLabel="Voltar para detalhes do álbum"
-				size={34}
-				svgSize={16}
-				top="1rem"
-				right="1rem"
-				mobileSize={34}
-				mobileTop="1rem"
-				mobileRight="1rem"
-				zIndex={10}
-			/>
+	<!-- ─── EXPAND PANEL (collapsed by default) ───────────── -->
+	<div class="card-expand-panel">
+		<!-- Hidden audio engine — persists independently -->
+		<div class="iframe-container" aria-hidden="true"></div>
 
-			<!-- Loading spinner (shown while Widget initialises) -->
-			<div class="loader-container">
-				<div class="spinner"></div>
+		<!-- Loading spinner (shown while Widget initialises) -->
+		<div class="loader-container">
+			<div class="spinner"></div>
+		</div>
+
+		<!-- Custom player UI (revealed after Widget READY) -->
+		<div class="custom-player" aria-label="Player de música" role="region">
+			<div class="player-now-playing">
+				<span class="player-track-title">—</span>
+				<span class="player-track-artist"></span>
 			</div>
 
-			<!-- Custom player UI (revealed after Widget READY) -->
-			<div
-				class="custom-player"
-				aria-label="Player de música"
-				role="region"
-			>
-				<div class="player-now-playing">
-					<span class="player-track-title">—</span>
-					<span class="player-track-artist"></span>
-				</div>
-
-				<div class="player-progress-wrap">
-					<div
-						class="player-progress-bar"
-						role="slider"
-						tabindex="0"
-						aria-label="Progresso da faixa"
-						aria-valuemin="0"
-						aria-valuemax="100"
-						aria-valuenow="0"
-					>
-						<div class="player-load-fill"></div>
-						<div class="player-progress-fill"></div>
-						<div class="player-thumb"></div>
-					</div>
-					<div class="player-time">
-						<span class="player-time-current">0:00</span>
-						<span class="player-time-total">0:00</span>
-					</div>
-				</div>
-
-				<div class="player-controls">
-					<PlayerButton type="prev" ariaLabel="Faixa anterior" />
-					<PlayerButton type="playpause" ariaLabel="Reproduzir" />
-					<PlayerButton type="next" ariaLabel="Próxima faixa" />
-				</div>
-
-				<ol class="player-tracklist" aria-label="Lista de faixas"></ol>
-
-				<!-- SoundCloud attribution (Terms of Use requirement) -->
-				<a
-					class="sc-attribution"
-					href={soundcloudUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-					aria-label={`Ouça ${title} no SoundCloud`}
+			<div class="player-progress-wrap">
+				<div
+					class="player-progress-bar"
+					role="slider"
+					tabindex="0"
+					aria-label="Progresso da faixa"
+					aria-valuemin="0"
+					aria-valuemax="100"
+					aria-valuenow="0"
 				>
-					<span class="sc-mark" aria-hidden="true">
-						<svg
-							role="img"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-							><title>SoundCloud</title><path
-								d="M23.999 14.165c-.052 1.796-1.612 3.169-3.4 3.169h-8.18a.68.68 0 0 1-.675-.683V7.862a.747.747 0 0 1 .452-.724s.75-.513 2.333-.513a5.364 5.364 0 0 1 2.763.755 5.433 5.433 0 0 1 2.57 3.54c.282-.08.574-.121.868-.12.884 0 1.73.358 2.347.992s.948 1.49.922 2.373ZM10.721 8.421c.247 2.98.427 5.697 0 8.672a.264.264 0 0 1-.53 0c-.395-2.946-.22-5.718 0-8.672a.264.264 0 0 1 .53 0ZM9.072 9.448c.285 2.659.37 4.986-.006 7.655a.277.277 0 0 1-.55 0c-.331-2.63-.256-5.02 0-7.655a.277.277 0 0 1 .556 0Zm-1.663-.257c.27 2.726.39 5.171 0 7.904a.266.266 0 0 1-.532 0c-.38-2.69-.257-5.21 0-7.904a.266.266 0 0 1 .532 0Zm-1.647.77a26.108 26.108 0 0 1-.008 7.147.272.272 0 0 1-.542 0 27.955 27.955 0 0 1 0-7.147.275.275 0 0 1 .55 0Zm-1.67 1.769c.421 1.865.228 3.5-.029 5.388a.257.257 0 0 1-.514 0c-.21-1.858-.398-3.549 0-5.389a.272.272 0 0 1 .543 0Zm-1.655-.273c.388 1.897.26 3.508-.01 5.412-.026.28-.514.283-.54 0-.244-1.878-.347-3.54-.01-5.412a.283.283 0 0 1 .56 0Zm-1.668.911c.4 1.268.257 2.292-.026 3.572a.257.257 0 0 1-.514 0c-.241-1.262-.354-2.312-.023-3.572a.283.283 0 0 1 .563 0Z"
-							></path></svg
-						>
-					</span>
-					<span>Ouça no SoundCloud</span>
-				</a>
+					<div class="player-load-fill"></div>
+					<div class="player-progress-fill"></div>
+					<div class="player-thumb"></div>
+				</div>
+				<div class="player-time">
+					<span class="player-time-current">0:00</span>
+					<span class="player-time-total">0:00</span>
+				</div>
 			</div>
+
+			<div class="player-controls">
+				<PlayerButton type="prev" ariaLabel="Faixa anterior" />
+				<PlayerButton type="playpause" ariaLabel="Reproduzir" />
+				<PlayerButton type="next" ariaLabel="Próxima faixa" />
+			</div>
+
+			<ol class="player-tracklist" aria-label="Lista de faixas"></ol>
+
+			<!-- SoundCloud attribution (Terms of Use requirement) -->
+			<a
+				class="sc-attribution"
+				href={soundcloudUrl}
+				target="_blank"
+				rel="noopener noreferrer"
+				aria-label={`Ouça ${title} no SoundCloud`}
+			>
+				<span class="sc-mark" aria-hidden="true">
+					<svg
+						role="img"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+						><title>SoundCloud</title><path
+							d="M23.999 14.165c-.052 1.796-1.612 3.169-3.4 3.169h-8.18a.68.68 0 0 1-.675-.683V7.862a.747.747 0 0 1 .452-.724s.75-.513 2.333-.513a5.364 5.364 0 0 1 2.763.755 5.433 5.433 0 0 1 2.57 3.54c.282-.08.574-.121.868-.12.884 0 1.73.358 2.347.992s.948 1.49.922 2.373ZM10.721 8.421c.247 2.98.427 5.697 0 8.672a.264.264 0 0 1-.53 0c-.395-2.946-.22-5.718 0-8.672a.264.264 0 0 1 .53 0ZM9.072 9.448c.285 2.659.37 4.986-.006 7.655a.277.277 0 0 1-.55 0c-.331-2.63-.256-5.02 0-7.655a.277.277 0 0 1 .556 0Zm-1.663-.257c.27 2.726.39 5.171 0 7.904a.266.266 0 0 1-.532 0c-.38-2.69-.257-5.21 0-7.904a.266.266 0 0 1 .532 0Zm-1.647.77a26.108 26.108 0 0 1-.008 7.147.272.272 0 0 1-.542 0 27.955 27.955 0 0 1 0-7.147.275.275 0 0 1 .55 0Zm-1.67 1.769c.421 1.865.228 3.5-.029 5.388a.257.257 0 0 1-.514 0c-.21-1.858-.398-3.549 0-5.389a.272.272 0 0 1 .543 0Zm-1.655-.273c.388 1.897.26 3.508-.01 5.412-.026.28-.514.283-.54 0-.244-1.878-.347-3.54-.01-5.412a.283.283 0 0 1 .56 0Zm-1.668.911c.4 1.268.257 2.292-.026 3.572a.257.257 0 0 1-.514 0c-.241-1.262-.354-2.312-.023-3.572a.283.283 0 0 1 .563 0Z"
+						></path></svg
+					>
+				</span>
+				<span>Ouça no SoundCloud</span>
+			</a>
 		</div>
 	</div>
 
 	<style>
 		/* ── Card shell ─────────────────────────────────────────────── */
 		.album-card {
-			perspective: 1500px;
+			position: relative;
 			width: 100%;
 			max-width: 400px;
 			margin: 2rem auto;
-			background: transparent;
-			border: none;
-			box-shadow: none;
-			cursor: pointer;
-			-webkit-tap-highlight-color: transparent;
-		}
-
-		.album-card.active {
-			cursor: default;
-		}
-
-		/* ── Card inner (3-D flip container) ───────────────────────── */
-		.card-inner {
-			position: relative;
-			width: 100%;
-			display: grid;
-			grid-template-areas: "face";
-			transform-style: preserve-3d;
-			transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-		}
-
-		.album-card.active .card-inner {
-			transform: rotateY(180deg);
-		}
-
-		/* Prevent invisible front face from blocking back-face pointer events */
-		.album-card.active .card-front {
-			pointer-events: none;
-		}
-
-		/* Hover lift (only when not active) */
-		.album-card:hover:not(.active) .card-inner {
-			transform: translateY(-6px);
-		}
-
-		/* ── Shared face styles ─────────────────────────────────────── */
-		.card-front,
-		.card-back {
-			grid-area: face;
-			width: 100%;
-			backface-visibility: hidden;
-			-webkit-backface-visibility: hidden;
 			border-radius: 20px;
 			padding: 2rem;
-			/* IMPORTANT: Do NOT add overflow:hidden or clip-path here.
-			   Both create a stacking context that flattens preserve-3d —
-			   overflow:hidden breaks iOS Safari, clip-path breaks Firefox.
-			   Content clipping is handled by inner wrappers instead. */
 			background: rgba(20, 20, 20, 0.6);
 			backdrop-filter: blur(15px);
 			-webkit-backdrop-filter: blur(15px);
@@ -191,12 +127,15 @@ const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 				inset 0 -1px 0 rgba(255, 255, 255, 0.1),
 				inset 0 0 22px 11px rgba(255, 255, 255, 0.05);
 			transition:
+				transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
 				box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
 				border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+			-webkit-tap-highlight-color: transparent;
 		}
 
-		/* Enhanced shadow on hover for front */
-		.album-card:hover:not(.active) .card-front {
+		/* Hover lift (only when not expanded) */
+		.album-card:hover:not(.active) {
+			transform: translateY(-6px);
 			box-shadow:
 				0 16px 48px rgba(0, 0, 0, 0.45),
 				inset 0 1px 0 rgba(255, 255, 255, 0.65),
@@ -206,8 +145,7 @@ const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 		}
 
 		/* Metallic shine – top edge */
-		.card-front::before,
-		.card-back::before {
+		.album-card::before {
 			content: "";
 			position: absolute;
 			top: 0;
@@ -222,41 +160,25 @@ const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 			);
 			pointer-events: none;
 			z-index: 3;
+			border-radius: 20px 20px 0 0;
 		}
 
-		/* Metallic shine – left edge */
-		.card-front::after,
-		.card-back::after {
-			content: "";
-			position: absolute;
-			top: 0;
-			left: 0;
-			width: 1px;
-			height: 100%;
-			background: linear-gradient(
-				180deg,
-				rgba(255, 255, 255, 0.8),
-				transparent,
-				rgba(255, 255, 255, 0.3)
-			);
-			pointer-events: none;
-			z-index: 3;
-		}
-
-		/* ── Front face ─────────────────────────────────────────────── */
-		.card-front {
-			z-index: 2;
-			transform: rotateY(0deg);
+		/* ── Card header (clickable toggle) ────────────────────────── */
+		.card-header {
+			cursor: pointer;
 			display: flex;
 			flex-direction: column;
+			user-select: none;
+		}
+
+		.album-card.active .card-header {
+			cursor: pointer;
 		}
 
 		.cover-wrapper {
 			width: 100%;
 			aspect-ratio: 1 / 1;
 			border-radius: 16px;
-			/* overflow:hidden is safe here — .cover-wrapper is a grandchild
-			   of preserve-3d, not a direct child, so it does not flatten 3D. */
 			overflow: hidden;
 			margin-bottom: 2rem;
 			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
@@ -334,62 +256,33 @@ const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 			}
 		}
 
-		/* ── SoundCloud attribution ─────────────────────────────────── */
-		.sc-attribution {
-			display: inline-flex;
-			align-items: center;
-			gap: 0.4rem;
-			text-decoration: none;
-			font-family: var(--font-family-secondary);
-			font-size: var(--text-sm);
-			color: var(--text-color-muted);
-			transition: color 0.2s ease;
-			margin-top: auto;
-			align-self: flex-start;
-		}
-
-		.sc-attribution:hover {
-			color: #ff5500;
-		}
-
-		.sc-mark {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			width: 1.4rem;
-			height: 1.4rem;
-			background: #ff5500;
-			color: #fff;
-			border-radius: 4px;
-			padding: 0.25rem;
-			flex-shrink: 0;
-		}
-
-		.sc-mark svg {
-			width: 100%;
-			height: 100%;
-			fill: currentColor;
-		}
-
-		/* ── Back face ──────────────────────────────────────────────── */
-		.card-back {
-			z-index: 1;
-			transform: rotateY(180deg);
-			display: flex;
-			flex-direction: column;
-			padding-top: 3.5rem; /* room for close button */
-			min-height: 420px;
+		/* ── Expand panel ──────────────────────────────────────────── */
+		.card-expand-panel {
+			max-height: 0;
+			opacity: 0;
+			overflow: hidden;
+			transition:
+				max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+				opacity 0.4s ease;
 			position: relative;
 		}
 
-		/* Hidden audio engine: absolutely positioned, visually hidden but active */
+		.album-card.active .card-expand-panel {
+			max-height: 800px;
+			opacity: 1;
+		}
+
+		/* Hidden audio engine: large enough for SoundCloud's internal canvas,
+		   but clipped to zero visual footprint so the waveform renderer
+		   doesn't crash with a 0-size createPattern call. */
 		.iframe-container {
 			position: absolute;
 			top: 0;
 			left: 0;
-			width: 10px;
-			height: 10px;
-			opacity: 0;
+			width: 300px;
+			height: 166px;
+			clip: rect(0, 0, 0, 0);
+			clip-path: inset(50%);
 			pointer-events: none;
 			overflow: hidden;
 			z-index: -10;
@@ -397,19 +290,10 @@ const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 
 		/* ── Loader ─────────────────────────────────────────────────── */
 		.loader-container {
-			position: absolute;
-			top: 3.5rem;
-			left: 2rem;
-			right: 2rem;
-			bottom: 2rem;
 			display: none; /* toggled by JS */
 			justify-content: center;
 			align-items: center;
-			background: rgba(20, 20, 20, 0.4);
-			backdrop-filter: blur(10px);
-			-webkit-backdrop-filter: blur(10px);
-			border-radius: 12px;
-			z-index: 4;
+			padding: 3rem 0;
 		}
 
 		.spinner {
@@ -437,6 +321,8 @@ const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 			opacity: 0;
 			pointer-events: none;
 			transition: opacity 0.35s ease;
+			padding-top: 1.5rem;
+			border-top: 1px solid rgba(255, 255, 255, 0.08);
 		}
 
 		.custom-player.visible {
@@ -550,33 +436,25 @@ const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 			gap: 0.75rem;
 		}
 
-
 		/* Tracklist */
 		.player-tracklist {
 			list-style: none;
 			counter-reset: track-counter;
 			margin: 0;
 			padding: 0;
+			max-height: 200px;
 			overflow-y: auto;
 			overflow-x: hidden;
-			flex: 1;
-			min-height: 0;
 			display: flex;
 			flex-direction: column;
 			gap: 0.1rem;
-			scrollbar-width: thin;
-			scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+			/* Hide scrollbar across browsers */
+			scrollbar-width: none;
+			-ms-overflow-style: none;
 		}
 
 		.player-tracklist::-webkit-scrollbar {
-			width: 3px;
-		}
-		.player-tracklist::-webkit-scrollbar-track {
-			background: transparent;
-		}
-		.player-tracklist::-webkit-scrollbar-thumb {
-			background: rgba(255, 255, 255, 0.2);
-			border-radius: 3px;
+			display: none;
 		}
 
 		.player-tracklist :global(.player-track-item) {
@@ -623,15 +501,47 @@ const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 			cursor: not-allowed;
 		}
 
+		/* ── SoundCloud attribution ─────────────────────────────────── */
+		.sc-attribution {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.4rem;
+			text-decoration: none;
+			font-family: var(--font-family-secondary);
+			font-size: var(--text-sm);
+			color: var(--text-color-muted);
+			transition: color 0.2s ease;
+			margin-top: auto;
+			align-self: flex-start;
+		}
+
+		.sc-attribution:hover {
+			color: #ff5500;
+		}
+
+		.sc-mark {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 1.4rem;
+			height: 1.4rem;
+			background: #ff5500;
+			color: #fff;
+			border-radius: 4px;
+			padding: 0.25rem;
+			flex-shrink: 0;
+		}
+
+		.sc-mark svg {
+			width: 100%;
+			height: 100%;
+			fill: currentColor;
+		}
+
 		/* ── Mobile overrides ───────────────────────────────────────── */
 		@media (max-width: 440px) {
-			.card-front,
-			.card-back {
+			.album-card {
 				padding: 1.25rem;
-			}
-
-			.card-back {
-				padding-top: 3rem;
 			}
 
 			.cover-wrapper {
