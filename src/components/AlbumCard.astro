@@ -8,9 +8,10 @@ interface Props {
 	cover: ImageMetadata;
 	year: number;
 	soundcloudUrl: string;
+	loading?: "eager" | "lazy";
 }
 
-const { title, artist, cover, year, soundcloudUrl } = Astro.props;
+const { title, artist, cover, year, soundcloudUrl, loading = "lazy" } = Astro.props;
 ---
 
 <article class="album-card" data-soundcloud-url={soundcloudUrl}>
@@ -24,7 +25,7 @@ const { title, artist, cover, year, soundcloudUrl } = Astro.props;
 				width={600}
 				height={600}
 				format="webp"
-				loading="eager"
+				loading={loading}
 			/>
 		</div>
 
