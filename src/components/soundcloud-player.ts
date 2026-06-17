@@ -83,21 +83,20 @@ class PlayerController {
 		this.widget = (window as any).SC.Widget(iframe);
 
 		// Cache DOM Elements
-		const back = cardEl.querySelector<HTMLElement>(".card-back")!;
-		this.loader = back.querySelector<HTMLElement>(".loader-container")!;
-		this.player = back.querySelector<HTMLElement>(".custom-player")!;
-		this.fill = back.querySelector<HTMLElement>(".player-progress-fill")!;
-		this.loadFill = back.querySelector<HTMLElement>(".player-load-fill")!;
-		this.thumb = back.querySelector<HTMLElement>(".player-thumb")!;
-		this.timeCur = back.querySelector<HTMLElement>(".player-time-current")!;
-		this.timeTot = back.querySelector<HTMLElement>(".player-time-total")!;
-		this.tracklist = back.querySelector<HTMLElement>(".player-tracklist")!;
-		this.trackTitle = back.querySelector<HTMLElement>(".player-track-title")!;
-		this.trackArtist = back.querySelector<HTMLElement>(".player-track-artist")!;
-		this.playBtn = back.querySelector<HTMLElement>(".player-playpause")!;
-		this.progressBar = back.querySelector<HTMLElement>(".player-progress-bar")!;
-		this.nextBtn = back.querySelector<HTMLButtonElement>(".player-next")!;
-		this.prevBtn = back.querySelector<HTMLButtonElement>(".player-prev")!;
+		this.loader = cardEl.querySelector<HTMLElement>(".loader-container")!;
+		this.player = cardEl.querySelector<HTMLElement>(".custom-player")!;
+		this.fill = cardEl.querySelector<HTMLElement>(".player-progress-fill")!;
+		this.loadFill = cardEl.querySelector<HTMLElement>(".player-load-fill")!;
+		this.thumb = cardEl.querySelector<HTMLElement>(".player-thumb")!;
+		this.timeCur = cardEl.querySelector<HTMLElement>(".player-time-current")!;
+		this.timeTot = cardEl.querySelector<HTMLElement>(".player-time-total")!;
+		this.tracklist = cardEl.querySelector<HTMLElement>(".player-tracklist")!;
+		this.trackTitle = cardEl.querySelector<HTMLElement>(".player-track-title")!;
+		this.trackArtist = cardEl.querySelector<HTMLElement>(".player-track-artist")!;
+		this.playBtn = cardEl.querySelector<HTMLElement>(".player-playpause")!;
+		this.progressBar = cardEl.querySelector<HTMLElement>(".player-progress-bar")!;
+		this.nextBtn = cardEl.querySelector<HTMLButtonElement>(".player-next")!;
+		this.prevBtn = cardEl.querySelector<HTMLButtonElement>(".player-prev")!;
 
 		this.showSpinner(true);
 		this._bindWidgetEvents();
@@ -433,24 +432,27 @@ export function setupAlbumCards(): void {
 			if (card.dataset.initialized === "true") return;
 			card.dataset.initialized = "true";
 
-			const closeBtn =
-				card.querySelector<HTMLButtonElement>(".close-btn");
+			const header =
+				card.querySelector<HTMLElement>(".card-header")!;
 			const iframeContainer =
 				card.querySelector<HTMLElement>(".iframe-container")!;
 			const loaderEl =
 				card.querySelector<HTMLElement>(".loader-container")!;
 			const soundcloudUrl = card.dataset.soundcloudUrl ?? "";
 
-			// ── Open: flip card and (on first open) init player ────────────
-			card.addEventListener("click", async (e: MouseEvent) => {
+			// ── Toggle: expand/collapse panel on header click ─────────────
+			header.addEventListener("click", async (e: MouseEvent) => {
 				const target = e.target as HTMLElement;
 
-				// Don't interfere with close button or attribution link
-				if (target.closest(".close-btn")) return;
+				// Don't interfere with attribution link
 				if (target.closest(".sc-attribution")) return;
 
-				// Already showing back face
-				if (card.classList.contains("active")) return;
+				// Already expanded — collapse it
+				if (card.classList.contains("active")) {
+					card.classList.remove("active");
+					// Intentionally NO pause / destroy here — audio continues
+					return;
+				}
 
 				card.classList.add("active");
 
@@ -486,13 +488,6 @@ export function setupAlbumCards(): void {
 					);
 				}
 				// Re-opens: controller already running, no action needed
-			});
-
-			// ── Close: visual flip only — audio continues ───────────────────
-			closeBtn?.addEventListener("click", (e: MouseEvent) => {
-				e.stopPropagation();
-				card.classList.remove("active");
-				// Intentionally NO pause / destroy here
 			});
 		});
 }
