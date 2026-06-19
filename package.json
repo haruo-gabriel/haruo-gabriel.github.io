@@ -12,6 +12,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "6.4.2"
+    "astro": "6.4.2",
+    "ogl": "^1.0.11"
   }
 }

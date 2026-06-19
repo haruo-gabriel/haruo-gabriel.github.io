@@ -1,51 +1,353 @@
 ---
+import { getImage } from "astro:assets";
 import { Image } from "astro:assets";
-import myPortrait from "../assets/eu.jpg";
+import portraitSrc from "../assets/eu.jpg";
+import depthmapSrc from "../assets/eu-depthmap.webp";
+
+const portrait = await getImage({ src: portraitSrc });
+const depthmap = await getImage({ src: depthmapSrc });
 ---
 
-<div class="my-portrait">
+<div class="my-portrait" id="portrait-container">
 	<Image
-		src={myPortrait}
+		src={portraitSrc}
 		alt="Haruo"
 		class="portrait-img"
+		id="portrait-static"
 		height={1024}
 		loading="eager"
 	/>
+	<canvas
+		id="portrait-canvas"
+		aria-hidden="true"
+		data-portrait-src={portrait.src}
+		data-depthmap-src={depthmap.src}
+	></canvas>
+	<button id="motion-permission-btn" aria-label="Enable motion effect">
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M12 18H12.01"/>
+			<path d="M7 20L5 22"/>
+			<path d="M17 20L19 22"/>
+			<path d="M5 2L7 4"/>
+			<path d="M19 2L17 4"/>
+			<rect x="5" y="4" width="14" height="16" rx="2"/>
+		</svg>
+		Enable motion
+	</button>
 </div>
 
 <script>
-	// Setup Image Zoom functionality on page load
-	document.addEventListener("astro:page-load", () => {
-		const portraitImg =
-			document.querySelector<HTMLElement>(".portrait-img");
-		if (portraitImg) {
-			portraitImg.addEventListener("click", () => {
-				const isZoomed = portraitImg.classList.toggle("zoomed");
+	import { Renderer, Mesh, Program, Plane, Texture } from "ogl";
 
-				if (isZoomed) {
-					// Calculate distance to center of viewport
-					const rect = portraitImg.getBoundingClientRect();
-					const viewportCenterX = window.innerWidth / 2;
-					const viewportCenterY = window.innerHeight / 2;
-					const imageCenterX = rect.left + rect.width / 2;
-					const imageCenterY = rect.top + rect.height / 2;
+	// ─────────────────────────────────────────
+	// State — kept alive across zoom open/close
+	// ─────────────────────────────────────────
+	let rafHandle: number | null = null;
+	let glRenderer: InstanceType<typeof Renderer> | null = null;
+	let glProgram: InstanceType<typeof Program> | null = null;
+	let glMesh: InstanceType<typeof Mesh> | null = null;
+	let targetMouseX = 0;
+	let targetMouseY = 0;
+	let currentMouseX = 0;
+	let currentMouseY = 0;
 
-					const translateX = viewportCenterX - imageCenterX;
-					const translateY = viewportCenterY - imageCenterY;
+	function lerp(a: number, b: number, t: number) {
+		return a + (b - a) * t;
+	}
+	function clamp(v: number, min: number, max: number) {
+		return Math.max(min, Math.min(max, v));
+	}
 
-					// Calculate max scale to fit within 90% of viewport
-					const scaleX = (window.innerWidth * 0.9) / rect.width;
-					const scaleY = (window.innerHeight * 0.9) / rect.height;
-					const scale = Math.min(scaleX, scaleY, 4.5); // cap at 4.5x scale
+	// ─────────────────────────────────────────
+	// Input handlers (stored for removal)
+	// ─────────────────────────────────────────
+	function onMouseMove(e: MouseEvent) {
+		targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+		targetMouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
+	}
 
-					// Apply dynamic transform
-					portraitImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-				} else {
-					// Reset to default
-					portraitImg.style.transform = "";
-				}
-			});
+	function onDeviceOrientation(e: DeviceOrientationEvent) {
+		if (e.gamma === null || e.beta === null) return;
+		targetMouseX = clamp(e.gamma / 45, -1, 1);
+		targetMouseY = clamp((e.beta - 45) / 45, -1, 1);
+	}
+
+	// ─────────────────────────────────────────
+	// OGL renderer — lazy-init once, reused on subsequent zooms
+	// ─────────────────────────────────────────
+	function ensureDepthEffect(canvas: HTMLCanvasElement) {
+		// Already initialized — just resize and restart loop
+		if (glRenderer && glProgram && glMesh) {
+			glRenderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+			startLoop(canvas);
+			return;
 		}
+
+		const portraitUrl = canvas.dataset.portraitSrc!;
+		const depthmapUrl = canvas.dataset.depthmapSrc!;
+
+		glRenderer = new Renderer({
+			canvas,
+			alpha: true,
+			premultipliedAlpha: false,
+			antialias: false,
+		});
+		const gl = glRenderer.gl;
+		gl.clearColor(0, 0, 0, 0);
+		glRenderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+
+		// Textures
+		const tImage = new Texture(gl);
+		const tDepth = new Texture(gl);
+
+		function loadTexture(tex: InstanceType<typeof Texture>, url: string) {
+			const img = new window.Image();
+			img.crossOrigin = "anonymous";
+			img.onload = () => { tex.image = img; };
+			img.src = url;
+		}
+		loadTexture(tImage, portraitUrl);
+		loadTexture(tDepth, depthmapUrl);
+
+		// Shaders
+		const vertex = /* glsl */ `
+			attribute vec3 position;
+			attribute vec2 uv;
+			varying vec2 vUv;
+			void main() {
+				vUv = uv;
+				gl_Position = vec4(position, 1.0);
+			}
+		`;
+
+		const fragment = /* glsl */ `
+			precision highp float;
+
+			uniform sampler2D tImage;
+			uniform sampler2D tDepth;
+			uniform vec2 uMouse;
+			uniform float uStrength;
+			uniform float uImageAspect;
+			uniform float uCanvasAspect;
+
+			varying vec2 vUv;
+
+			void main() {
+				// Correct aspect ratio so image is never stretched
+				vec2 uv = vUv;
+				float imgAR = uImageAspect;
+				float canAR = uCanvasAspect;
+				if (canAR > imgAR) {
+					float scale = canAR / imgAR;
+					uv.x = (uv.x - 0.5) * scale + 0.5;
+				} else {
+					float scale = imgAR / canAR;
+					uv.y = (uv.y - 0.5) * scale + 0.5;
+				}
+
+				// Scale slightly inward so parallax never reveals edges
+				uv = (uv - 0.5) * 0.94 + 0.5;
+
+				// Decode depth from turbo colormap:
+				// red channel high = foreground (close), blue high = background (far)
+				vec3 depthColor = texture2D(tDepth, uv).rgb;
+				float depth = clamp((depthColor.r - depthColor.b) * 0.5 + 0.5, 0.0, 1.0);
+
+				// Parallax offset — foreground shifts most
+				vec2 offset = uMouse * depth * uStrength;
+
+				vec4 color = texture2D(tImage, uv + offset);
+				gl_FragColor = color;
+			}
+		`;
+
+		const geometry = new Plane(gl, { width: 2, height: 2 });
+		glProgram = new Program(gl, {
+			vertex,
+			fragment,
+			uniforms: {
+				tImage: { value: tImage },
+				tDepth: { value: tDepth },
+				uMouse: { value: [0, 0] },
+				uStrength: { value: 0.04 },
+				uImageAspect: { value: 1 },
+				uCanvasAspect: { value: canvas.offsetWidth / canvas.offsetHeight },
+			},
+		});
+
+		// Update image aspect ratio once image loads
+		const probeImg = new window.Image();
+		probeImg.onload = () => {
+			if (glProgram) {
+				glProgram.uniforms.uImageAspect.value =
+					probeImg.naturalWidth / probeImg.naturalHeight;
+			}
+		};
+		probeImg.src = portraitUrl;
+
+		glMesh = new Mesh(gl, { geometry, program: glProgram });
+
+		// Resize listener (persistent, one per page load)
+		window.addEventListener("resize", () => {
+			if (glRenderer) glRenderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+		});
+
+		startLoop(canvas);
+	}
+
+	function startLoop(canvas: HTMLCanvasElement) {
+		if (rafHandle !== null) return; // already running
+		function loop() {
+			rafHandle = requestAnimationFrame(loop);
+			currentMouseX = lerp(currentMouseX, targetMouseX, 0.07);
+			currentMouseY = lerp(currentMouseY, targetMouseY, 0.07);
+			if (glProgram) {
+				glProgram.uniforms.uMouse.value = [currentMouseX, currentMouseY];
+				glProgram.uniforms.uCanvasAspect.value =
+					canvas.offsetWidth / canvas.offsetHeight;
+			}
+			if (glRenderer && glMesh) glRenderer.render({ scene: glMesh });
+		}
+		loop();
+	}
+
+	/** Pause: stop RAF and detach input. Renderer stays alive for reuse. */
+	function pauseDepthEffect() {
+		if (rafHandle !== null) {
+			cancelAnimationFrame(rafHandle);
+			rafHandle = null;
+		}
+		window.removeEventListener("mousemove", onMouseMove);
+		window.removeEventListener("deviceorientation", onDeviceOrientation);
+		// Smoothly reset lerp target so re-open starts centered
+		targetMouseX = 0;
+		targetMouseY = 0;
+	}
+
+	/** Full teardown: called on page navigation only. */
+	function teardownDepthEffect() {
+		pauseDepthEffect();
+		if (glRenderer) {
+			const ext = glRenderer.gl.getExtension("WEBGL_lose_context");
+			ext?.loseContext();
+			glRenderer = null;
+		}
+		glProgram = null;
+		glMesh = null;
+		currentMouseX = 0;
+		currentMouseY = 0;
+	}
+
+	// ─────────────────────────────────────────
+	// iOS permission flow
+	// ─────────────────────────────────────────
+	function isMobile() {
+		return window.matchMedia("(pointer: coarse)").matches;
+	}
+
+	function setupMotionInput(canvas: HTMLCanvasElement, permBtn: HTMLButtonElement) {
+		if (!isMobile()) {
+			window.addEventListener("mousemove", onMouseMove);
+			permBtn.style.display = "none";
+			return;
+		}
+
+		// Android & other mobile: no permission API needed
+		const needsPermission =
+			typeof (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission === "function";
+
+		if (!needsPermission) {
+			window.addEventListener("deviceorientation", onDeviceOrientation);
+			permBtn.style.display = "none";
+			return;
+		}
+
+		// iOS 13+: show the permission button
+		permBtn.style.display = "flex";
+		permBtn.onclick = async () => {
+			try {
+				const result = await (
+					DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }
+				).requestPermission();
+				if (result === "granted") {
+					window.addEventListener("deviceorientation", onDeviceOrientation);
+					permBtn.style.display = "none";
+				}
+			} catch (err) {
+				console.warn("Motion permission denied:", err);
+			}
+		};
+	}
+
+	// ─────────────────────────────────────────
+	// Zoom logic
+	// ─────────────────────────────────────────
+	function initPortrait() {
+		const staticImg = document.querySelector<HTMLElement>("#portrait-static");
+		const canvas = document.querySelector<HTMLCanvasElement>("#portrait-canvas");
+		const permBtn = document.querySelector<HTMLButtonElement>("#motion-permission-btn");
+
+		if (!staticImg || !canvas || !permBtn) return;
+
+		staticImg.addEventListener("click", () => {
+			const isZoomed = staticImg.classList.toggle("zoomed");
+
+			if (isZoomed) {
+				// Calculate zoom transform
+				const rect = staticImg.getBoundingClientRect();
+				const scaleX = (window.innerWidth * 0.9) / rect.width;
+				const scaleY = (window.innerHeight * 0.9) / rect.height;
+				const scale = Math.min(scaleX, scaleY, 4.5);
+
+				const scaledW = rect.width * scale;
+				const scaledH = rect.height * scale;
+				const canvasLeft = (window.innerWidth - scaledW) / 2;
+				const canvasTop = (window.innerHeight - scaledH) / 2;
+
+				const viewportCenterX = window.innerWidth / 2;
+				const viewportCenterY = window.innerHeight / 2;
+				const imageCenterX = rect.left + rect.width / 2;
+				const imageCenterY = rect.top + rect.height / 2;
+
+				staticImg.style.transform = `translate(${viewportCenterX - imageCenterX}px, ${viewportCenterY - imageCenterY}px) scale(${scale})`;
+
+				// Position canvas exactly where the zoomed image appears
+				canvas.style.left = canvasLeft + "px";
+				canvas.style.top = canvasTop + "px";
+				canvas.style.width = scaledW + "px";
+				canvas.style.height = scaledH + "px";
+				canvas.classList.add("active");
+
+				// Ensure OGL is initialized and start the render loop
+				requestAnimationFrame(() => {
+					ensureDepthEffect(canvas);
+					setupMotionInput(canvas, permBtn);
+				});
+			} else {
+				staticImg.style.transform = "";
+				canvas.classList.remove("active");
+				permBtn.style.display = "none";
+				pauseDepthEffect();
+			}
+		});
+
+		// Canvas click closes zoom (canvas sits on top when active)
+		canvas.addEventListener("click", () => {
+			if (canvas.classList.contains("active")) {
+				staticImg.classList.remove("zoomed");
+				staticImg.style.transform = "";
+				canvas.classList.remove("active");
+				permBtn.style.display = "none";
+				pauseDepthEffect();
+			}
+		});
+	}
+
+	document.addEventListener("astro:page-load", initPortrait);
+
+	// Teardown before Astro swaps the DOM (full GL context release)
+	document.addEventListener("astro:before-swap", () => {
+		teardownDepthEffect();
 	});
 </script>
 
@@ -53,6 +355,7 @@ import myPortrait from "../assets/eu.jpg";
 	/* PORTRAIT PICTURE */
 
 	.my-portrait {
+		position: relative;
 		display: flex;
 		justify-content: center;
 		align-self: center;
@@ -65,7 +368,7 @@ import myPortrait from "../assets/eu.jpg";
 		height: 100%;
 		width: auto;
 		transform: rotate(-1deg);
-		transition: transform 0.3s ease;
+		transition: transform 0.3s ease, opacity 0.35s ease;
 	}
 
 	.portrait-img:hover {
@@ -75,8 +378,61 @@ import myPortrait from "../assets/eu.jpg";
 
 	.portrait-img.zoomed {
 		z-index: 1000;
-		box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.8);
 		cursor: zoom-out;
+		opacity: 0; /* Canvas takes over */
+	}
+
+	/* WebGL Canvas Overlay */
+	#portrait-canvas {
+		position: fixed;
+		top: 0;
+		left: 0;
+		opacity: 0;
+		pointer-events: none;
+		z-index: 999;
+		transition: opacity 0.35s ease;
+	}
+
+	#portrait-canvas.active {
+		opacity: 1;
+		pointer-events: auto;
+		cursor: zoom-out;
+		/* Backdrop matches the old .portrait-img.zoomed shadow */
+		box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.8);
+	}
+
+	/* iOS motion permission button */
+	#motion-permission-btn {
+		display: none;
+		position: fixed;
+		z-index: 1001;
+		bottom: 2rem;
+		left: 50%;
+		transform: translateX(-50%);
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.6rem 1.2rem;
+		background: rgba(20, 20, 20, 0.75);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		border-radius: 999px;
+		color: #fff;
+		font-family: var(--font-family-main);
+		font-size: 0.8rem;
+		cursor: pointer;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+		transition: background 0.2s ease;
+	}
+
+	#motion-permission-btn svg {
+		width: 1.1rem;
+		height: 1.1rem;
+		flex-shrink: 0;
+	}
+
+	#motion-permission-btn:hover {
+		background: rgba(40, 40, 40, 0.9);
 	}
 
 	/* RESPONSIVE DESIGN */
