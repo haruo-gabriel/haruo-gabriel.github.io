@@ -53,9 +53,9 @@ const depthmap = await getImage({ src: depthmapSrc });
 		/** Resolution of the point cloud grid (width & height). 256x256 is optimal. */
 		gridResolution: 256,
 		/** Size of each point in pixels. */
-		pointSize: 1.5,
+		pointSize: 2.0,
 		/** Z-axis extrusion depth (thickness of the 3D volume). */
-		zScale: 0.7,
+		zScale: 1.0,
 		/** Maximum Y-axis rotation (horizontal tilt) in radians. */
 		maxRotationY: 2.0,
 		/** Maximum X-axis rotation (vertical tilt) in radians. */
@@ -67,7 +67,7 @@ const depthmap = await getImage({ src: depthmapSrc });
 		/** Camera Z position from the scene origin. */
 		cameraZ: 1.8,
 		/** Camera field of view (FOV). */
-		cameraFov: 60,
+		cameraFov: 50,
 		/**
 		 * Turbo colormap depth decode parameters.
 		 * scale: 0.5 and bias: 0.5 maps (R - B) colormap range to [0, 1].
