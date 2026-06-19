@@ -21,35 +21,87 @@ const depthmap = await getImage({ src: depthmapSrc });
 		id="portrait-canvas"
 		aria-hidden="true"
 		data-portrait-src={portrait.src}
-		data-depthmap-src={depthmap.src}
-	></canvas>
+		data-depthmap-src={depthmap.src}></canvas>
 	<button id="motion-permission-btn" aria-label="Enable motion effect">
-		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-			<path d="M12 18H12.01"/>
-			<path d="M7 20L5 22"/>
-			<path d="M17 20L19 22"/>
-			<path d="M5 2L7 4"/>
-			<path d="M19 2L17 4"/>
-			<rect x="5" y="4" width="14" height="16" rx="2"/>
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			<path d="M12 18H12.01"></path>
+			<path d="M7 20L5 22"></path>
+			<path d="M17 20L19 22"></path>
+			<path d="M5 2L7 4"></path>
+			<path d="M19 2L17 4"></path>
+			<rect x="5" y="4" width="14" height="16" rx="2"></rect>
 		</svg>
 		Enable motion
 	</button>
 </div>
 
 <script>
-	import { Renderer, Mesh, Program, Plane, Texture } from "ogl";
+	import * as THREE from "three";
+
+	// ═══════════════════════════════════════════
+	// POINT CLOUD EFFECT — CONFIGURATION MACROS
+	// ═══════════════════════════════════════════
+	const CONFIG = {
+		/** Resolution of the point cloud grid (width & height). 256x256 is optimal. */
+		gridResolution: 256,
+		/** Size of each point in pixels. */
+		pointSize: 1.5,
+		/** Z-axis extrusion depth (thickness of the 3D volume). */
+		zScale: 0.7,
+		/** Maximum Y-axis rotation (horizontal tilt) in radians. */
+		maxRotationY: 2.0,
+		/** Maximum X-axis rotation (vertical tilt) in radians. */
+		maxRotationX: 2.0,
+		/** Mouse rotation interpolation speed. Higher = snappier, lower = smoother. */
+		smoothingSpeed: 0.08,
+		/** Accelerometer range mapping (degrees) for gyroscope control. */
+		tiltRangeDeg: 40,
+		/** Camera Z position from the scene origin. */
+		cameraZ: 1.8,
+		/** Camera field of view (FOV). */
+		cameraFov: 60,
+		/**
+		 * Turbo colormap depth decode parameters.
+		 * scale: 0.5 and bias: 0.5 maps (R - B) colormap range to [0, 1].
+		 */
+		decodeScale: 0.5,
+		decodeBias: 0.5,
+	};
+	// ═══════════════════════════════════════════
 
 	// ─────────────────────────────────────────
-	// State — kept alive across zoom open/close
+	// State — cached for reuse on subsequent zooms
 	// ─────────────────────────────────────────
 	let rafHandle: number | null = null;
-	let glRenderer: InstanceType<typeof Renderer> | null = null;
-	let glProgram: InstanceType<typeof Program> | null = null;
-	let glMesh: InstanceType<typeof Mesh> | null = null;
+	let glRenderer: THREE.WebGLRenderer | null = null;
+	let glScene: THREE.Scene | null = null;
+	let glCamera: THREE.PerspectiveCamera | null = null;
+	let glGeometry: THREE.BufferGeometry | null = null;
+	let glMaterial: THREE.ShaderMaterial | null = null;
+	let glPoints: THREE.Points | null = null;
+
+	let targetRotationX = 0; // horizontal tilt (rotates around Y-axis)
+	let targetRotationY = 0; // vertical tilt (rotates around X-axis)
+	let currentRotationX = 0;
+	let currentRotationY = 0;
+
 	let targetMouseX = 0;
 	let targetMouseY = 0;
-	let currentMouseX = 0;
-	let currentMouseY = 0;
+
+	// Cached raw pixel data arrays
+	let colorPixels: Uint8ClampedArray | null = null;
+	let depthPixels: Uint8ClampedArray | null = null;
+	let imageAspectRatio = 1.0;
+	let assetsLoaded = false;
+	let isInitializing = false;
 
 	function lerp(a: number, b: number, t: number) {
 		return a + (b - a) * t;
@@ -59,159 +111,296 @@ const depthmap = await getImage({ src: depthmapSrc });
 	}
 
 	// ─────────────────────────────────────────
-	// Input handlers (stored for removal)
+	// Input handlers
 	// ─────────────────────────────────────────
 	function onMouseMove(e: MouseEvent) {
 		targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
 		targetMouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
+		targetRotationX = targetMouseX * CONFIG.maxRotationY;
+		targetRotationY = targetMouseY * CONFIG.maxRotationX;
 	}
 
 	function onDeviceOrientation(e: DeviceOrientationEvent) {
 		if (e.gamma === null || e.beta === null) return;
-		targetMouseX = clamp(e.gamma / 45, -1, 1);
-		targetMouseY = clamp((e.beta - 45) / 45, -1, 1);
+		targetMouseX = clamp(e.gamma / CONFIG.tiltRangeDeg, -1, 1);
+		targetMouseY = clamp(
+			(e.beta - CONFIG.tiltRangeDeg) / CONFIG.tiltRangeDeg,
+			-1,
+			1,
+		);
+		targetRotationX = targetMouseX * CONFIG.maxRotationY;
+		targetRotationY = targetMouseY * CONFIG.maxRotationX;
+	}
+
+	// Helper to load an HTML Image
+	function loadImage(url: string): Promise<HTMLImageElement> {
+		return new Promise((resolve, reject) => {
+			const img = new window.Image();
+			img.crossOrigin = "anonymous";
+			img.onload = () => resolve(img);
+			img.onerror = (err) => reject(err);
+			img.src = url;
+		});
+	}
+
+	// Helper to extract pixel colors from an image using offscreen canvas
+	function getPixelData(
+		img: HTMLImageElement,
+		width: number,
+		height: number,
+	): Uint8ClampedArray {
+		const canvas = document.createElement("canvas");
+		canvas.width = width;
+		canvas.height = height;
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return new Uint8ClampedArray();
+		ctx.drawImage(img, 0, 0, width, height);
+		return ctx.getImageData(0, 0, width, height).data;
 	}
 
 	// ─────────────────────────────────────────
-	// OGL renderer — lazy-init once, reused on subsequent zooms
+	// Three.js renderer — lazy-init and cached
 	// ─────────────────────────────────────────
-	function ensureDepthEffect(canvas: HTMLCanvasElement) {
-		// Already initialized — just resize and restart loop
-		if (glRenderer && glProgram && glMesh) {
-			glRenderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-			startLoop(canvas);
+	async function ensureDepthEffect(canvas: HTMLCanvasElement) {
+		if (isInitializing) return;
+
+		const width = canvas.offsetWidth;
+		const height = canvas.offsetHeight;
+
+		// Already initialized — update size, scene camera aspect ratio, restart loop
+		if (glRenderer && glScene && glCamera && glPoints) {
+			glRenderer.setSize(width, height, false);
+			glCamera.aspect = width / height;
+			glCamera.updateProjectionMatrix();
+			startLoop();
 			return;
 		}
+
+		isInitializing = true;
 
 		const portraitUrl = canvas.dataset.portraitSrc!;
 		const depthmapUrl = canvas.dataset.depthmapSrc!;
 
-		glRenderer = new Renderer({
-			canvas,
-			alpha: true,
-			premultipliedAlpha: false,
-			antialias: false,
-		});
-		const gl = glRenderer.gl;
-		gl.clearColor(0, 0, 0, 0);
-		glRenderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+		try {
+			// Preload and sample assets if not already cached
+			if (!assetsLoaded) {
+				const [portraitImg, depthmapImg] = await Promise.all([
+					loadImage(portraitUrl),
+					loadImage(depthmapUrl),
+				]);
 
-		// Textures
-		const tImage = new Texture(gl);
-		const tDepth = new Texture(gl);
+				imageAspectRatio =
+					portraitImg.naturalWidth / portraitImg.naturalHeight;
 
-		function loadTexture(tex: InstanceType<typeof Texture>, url: string) {
-			const img = new window.Image();
-			img.crossOrigin = "anonymous";
-			img.onload = () => { tex.image = img; };
-			img.src = url;
-		}
-		loadTexture(tImage, portraitUrl);
-		loadTexture(tDepth, depthmapUrl);
-
-		// Shaders
-		const vertex = /* glsl */ `
-			attribute vec3 position;
-			attribute vec2 uv;
-			varying vec2 vUv;
-			void main() {
-				vUv = uv;
-				gl_Position = vec4(position, 1.0);
+				// Downsample on the CPU
+				colorPixels = getPixelData(
+					portraitImg,
+					CONFIG.gridResolution,
+					CONFIG.gridResolution,
+				);
+				depthPixels = getPixelData(
+					depthmapImg,
+					CONFIG.gridResolution,
+					CONFIG.gridResolution,
+				);
+				assetsLoaded = true;
 			}
-		`;
 
-		const fragment = /* glsl */ `
-			precision highp float;
+			if (!colorPixels || !depthPixels) return;
 
-			uniform sampler2D tImage;
-			uniform sampler2D tDepth;
-			uniform vec2 uMouse;
-			uniform float uStrength;
-			uniform float uImageAspect;
-			uniform float uCanvasAspect;
+			// Initialize Three.js renderer
+			glRenderer = new THREE.WebGLRenderer({
+				canvas,
+				alpha: true,
+				antialias: true,
+				premultipliedAlpha: false,
+			});
+			glRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+			glRenderer.setSize(width, height, false);
 
-			varying vec2 vUv;
+			// Scene
+			glScene = new THREE.Scene();
 
-			void main() {
-				// Correct aspect ratio so image is never stretched
-				vec2 uv = vUv;
-				float imgAR = uImageAspect;
-				float canAR = uCanvasAspect;
-				if (canAR > imgAR) {
-					float scale = canAR / imgAR;
-					uv.x = (uv.x - 0.5) * scale + 0.5;
-				} else {
-					float scale = imgAR / canAR;
-					uv.y = (uv.y - 0.5) * scale + 0.5;
+			// Camera
+			glCamera = new THREE.PerspectiveCamera(
+				CONFIG.cameraFov,
+				width / height,
+				0.1,
+				10,
+			);
+			glCamera.position.z = CONFIG.cameraZ;
+
+			// Generate BufferGeometry from pixel arrays
+			const count = CONFIG.gridResolution * CONFIG.gridResolution;
+			const positions = new Float32Array(count * 3);
+			const colors = new Float32Array(count * 3);
+
+			let idx = 0;
+			const res = CONFIG.gridResolution;
+			for (let r = 0; r < res; r++) {
+				for (let c = 0; c < res; c++) {
+					const pixelIdx = (r * res + c) * 4;
+
+					// Normalized position in [-0.5, 0.5], aspect corrected
+					const x = (c / res - 0.5) * imageAspectRatio;
+					const y = -(r / res - 0.5);
+
+					// Decode turbo colormap: (R - B) * scale + bias
+					const dr = depthPixels[pixelIdx] / 255.0;
+					const db = depthPixels[pixelIdx + 2] / 255.0;
+					const depth = clamp(
+						(dr - db) * CONFIG.decodeScale + CONFIG.decodeBias,
+						0.0,
+						1.0,
+					);
+
+					// Displace along Z, centered around 0
+					const z = (depth - 0.5) * CONFIG.zScale;
+
+					positions[idx * 3] = x;
+					positions[idx * 3 + 1] = y;
+					positions[idx * 3 + 2] = z;
+
+					// Colors normalized to [0, 1]
+					colors[idx * 3] = colorPixels[pixelIdx] / 255.0;
+					colors[idx * 3 + 1] = colorPixels[pixelIdx + 1] / 255.0;
+					colors[idx * 3 + 2] = colorPixels[pixelIdx + 2] / 255.0;
+
+					idx++;
+				}
+			}
+
+			glGeometry = new THREE.BufferGeometry();
+			glGeometry.setAttribute(
+				"position",
+				new THREE.BufferAttribute(positions, 3),
+			);
+			glGeometry.setAttribute(
+				"color",
+				new THREE.BufferAttribute(colors, 3),
+			);
+
+			// Custom shaders for 3D rotation, attenuation, and circular styling
+			const vertexShader = `
+				uniform float uPointSize;
+				uniform vec2 uRotation;
+				varying vec3 vColor;
+
+				vec3 rotateY(vec3 p, float angle) {
+					float c = cos(angle);
+					float s = sin(angle);
+					return vec3(p.x * c - p.z * s, p.y, p.x * s + p.z * c);
 				}
 
-				// Scale slightly inward so parallax never reveals edges
-				uv = (uv - 0.5) * 0.94 + 0.5;
+				vec3 rotateX(vec3 p, float angle) {
+					float c = cos(angle);
+					float s = sin(angle);
+					return vec3(p.x, p.y * c - p.z * s, p.y * s + p.z * c);
+				}
 
-				// Decode depth from turbo colormap:
-				// red channel high = foreground (close), blue high = background (far)
-				vec3 depthColor = texture2D(tDepth, uv).rgb;
-				float depth = clamp((depthColor.r - depthColor.b) * 0.5 + 0.5, 0.0, 1.0);
+				void main() {
+					vColor = color;
+					
+					// Apply interactive 3D tilt
+					vec3 pos = position;
+					pos = rotateY(pos, uRotation.x);
+					pos = rotateX(pos, uRotation.y);
 
-				// Parallax offset — foreground shifts most
-				vec2 offset = uMouse * depth * uStrength;
+					vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+					gl_Position = projectionMatrix * mvPosition;
 
-				vec4 color = texture2D(tImage, uv + offset);
-				gl_FragColor = color;
-			}
-		`;
+					// Attenuate point size based on camera distance
+					// Since camera Z is 1.8, using (1.8 / -mvPosition.z) keeps the base point size
+					// close to uPointSize while providing a natural distance attenuation.
+					gl_PointSize = uPointSize * (1.8 / -mvPosition.z);
+				}
+			`;
 
-		const geometry = new Plane(gl, { width: 2, height: 2 });
-		glProgram = new Program(gl, {
-			vertex,
-			fragment,
-			uniforms: {
-				tImage: { value: tImage },
-				tDepth: { value: tDepth },
-				uMouse: { value: [0, 0] },
-				uStrength: { value: 0.04 },
-				uImageAspect: { value: 1 },
-				uCanvasAspect: { value: canvas.offsetWidth / canvas.offsetHeight },
-			},
-		});
+			const fragmentShader = `
+				varying vec3 vColor;
 
-		// Update image aspect ratio once image loads
-		const probeImg = new window.Image();
-		probeImg.onload = () => {
-			if (glProgram) {
-				glProgram.uniforms.uImageAspect.value =
-					probeImg.naturalWidth / probeImg.naturalHeight;
-			}
-		};
-		probeImg.src = portraitUrl;
+				void main() {
+					// Draw smooth circular particles
+					vec2 circCoord = gl_PointCoord - vec2(0.5);
+					if (dot(circCoord, circCoord) > 0.25) {
+						discard;
+					}
+					
+					// Add a soft edge glow effect
+					float alpha = 1.0 - smoothstep(0.15, 0.25, dot(circCoord, circCoord));
+					gl_FragColor = vec4(vColor, alpha);
+				}
+			`;
 
-		glMesh = new Mesh(gl, { geometry, program: glProgram });
+			glMaterial = new THREE.ShaderMaterial({
+				vertexShader,
+				fragmentShader,
+				uniforms: {
+					uPointSize: { value: CONFIG.pointSize },
+					uRotation: { value: new THREE.Vector2(0, 0) },
+				},
+				vertexColors: true,
+				transparent: true,
+				depthWrite: false,
+				depthTest: true,
+			});
 
-		// Resize listener (persistent, one per page load)
-		window.addEventListener("resize", () => {
-			if (glRenderer) glRenderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-		});
+			glPoints = new THREE.Points(glGeometry, glMaterial);
+			glScene.add(glPoints);
 
-		startLoop(canvas);
+			// Handle window resizes
+			window.addEventListener("resize", onResize);
+
+			startLoop();
+			isInitializing = false;
+		} catch (err) {
+			console.error("Failed to initialize point cloud effect:", err);
+			isInitializing = false;
+		}
 	}
 
-	function startLoop(canvas: HTMLCanvasElement) {
-		if (rafHandle !== null) return; // already running
+	function onResize() {
+		const canvas =
+			document.querySelector<HTMLCanvasElement>("#portrait-canvas");
+		if (canvas && glRenderer && glCamera) {
+			glRenderer.setSize(canvas.offsetWidth, canvas.offsetHeight, false);
+			glCamera.aspect = canvas.offsetWidth / canvas.offsetHeight;
+			glCamera.updateProjectionMatrix();
+		}
+	}
+
+	function startLoop() {
+		if (rafHandle !== null) return;
 		function loop() {
 			rafHandle = requestAnimationFrame(loop);
-			currentMouseX = lerp(currentMouseX, targetMouseX, 0.07);
-			currentMouseY = lerp(currentMouseY, targetMouseY, 0.07);
-			if (glProgram) {
-				glProgram.uniforms.uMouse.value = [currentMouseX, currentMouseY];
-				glProgram.uniforms.uCanvasAspect.value =
-					canvas.offsetWidth / canvas.offsetHeight;
+
+			// Interpolate orientation/mouse rotation
+			currentRotationX = lerp(
+				currentRotationX,
+				targetRotationX,
+				CONFIG.smoothingSpeed,
+			);
+			currentRotationY = lerp(
+				currentRotationY,
+				targetRotationY,
+				CONFIG.smoothingSpeed,
+			);
+
+			if (glMaterial) {
+				glMaterial.uniforms.uRotation.value.set(
+					currentRotationX,
+					currentRotationY,
+				);
 			}
-			if (glRenderer && glMesh) glRenderer.render({ scene: glMesh });
+
+			if (glRenderer && glScene && glCamera) {
+				glRenderer.render(glScene, glCamera);
+			}
 		}
 		loop();
 	}
 
-	/** Pause: stop RAF and detach input. Renderer stays alive for reuse. */
+	/** Pause: stop RAF and detach input. Three.js context remains alive. */
 	function pauseDepthEffect() {
 		if (rafHandle !== null) {
 			cancelAnimationFrame(rafHandle);
@@ -219,23 +408,43 @@ const depthmap = await getImage({ src: depthmapSrc });
 		}
 		window.removeEventListener("mousemove", onMouseMove);
 		window.removeEventListener("deviceorientation", onDeviceOrientation);
-		// Smoothly reset lerp target so re-open starts centered
+		targetRotationX = 0;
+		targetRotationY = 0;
 		targetMouseX = 0;
 		targetMouseY = 0;
 	}
 
-	/** Full teardown: called on page navigation only. */
+	/** Full teardown: releases WebGL context and disposes resources. */
 	function teardownDepthEffect() {
 		pauseDepthEffect();
+		window.removeEventListener("resize", onResize);
+
+		if (glPoints && glScene) {
+			glScene.remove(glPoints);
+		}
+		if (glGeometry) {
+			glGeometry.dispose();
+			glGeometry = null;
+		}
+		if (glMaterial) {
+			glMaterial.dispose();
+			glMaterial = null;
+		}
 		if (glRenderer) {
-			const ext = glRenderer.gl.getExtension("WEBGL_lose_context");
-			ext?.loseContext();
+			glRenderer.dispose();
+			glRenderer.forceContextLoss();
 			glRenderer = null;
 		}
-		glProgram = null;
-		glMesh = null;
-		currentMouseX = 0;
-		currentMouseY = 0;
+
+		glScene = null;
+		glCamera = null;
+		glPoints = null;
+
+		colorPixels = null;
+		depthPixels = null;
+		assetsLoaded = false;
+		currentRotationX = 0;
+		currentRotationY = 0;
 	}
 
 	// ─────────────────────────────────────────
@@ -245,7 +454,10 @@ const depthmap = await getImage({ src: depthmapSrc });
 		return window.matchMedia("(pointer: coarse)").matches;
 	}
 
-	function setupMotionInput(canvas: HTMLCanvasElement, permBtn: HTMLButtonElement) {
+	function setupMotionInput(
+		canvas: HTMLCanvasElement,
+		permBtn: HTMLButtonElement,
+	) {
 		if (!isMobile()) {
 			window.addEventListener("mousemove", onMouseMove);
 			permBtn.style.display = "none";
@@ -254,7 +466,11 @@ const depthmap = await getImage({ src: depthmapSrc });
 
 		// Android & other mobile: no permission API needed
 		const needsPermission =
-			typeof (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission === "function";
+			typeof (
+				DeviceOrientationEvent as unknown as {
+					requestPermission?: () => Promise<string>;
+				}
+			).requestPermission === "function";
 
 		if (!needsPermission) {
 			window.addEventListener("deviceorientation", onDeviceOrientation);
@@ -267,10 +483,15 @@ const depthmap = await getImage({ src: depthmapSrc });
 		permBtn.onclick = async () => {
 			try {
 				const result = await (
-					DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> }
+					DeviceOrientationEvent as unknown as {
+						requestPermission: () => Promise<string>;
+					}
 				).requestPermission();
 				if (result === "granted") {
-					window.addEventListener("deviceorientation", onDeviceOrientation);
+					window.addEventListener(
+						"deviceorientation",
+						onDeviceOrientation,
+					);
 					permBtn.style.display = "none";
 				}
 			} catch (err) {
@@ -283,9 +504,13 @@ const depthmap = await getImage({ src: depthmapSrc });
 	// Zoom logic
 	// ─────────────────────────────────────────
 	function initPortrait() {
-		const staticImg = document.querySelector<HTMLElement>("#portrait-static");
-		const canvas = document.querySelector<HTMLCanvasElement>("#portrait-canvas");
-		const permBtn = document.querySelector<HTMLButtonElement>("#motion-permission-btn");
+		const staticImg =
+			document.querySelector<HTMLElement>("#portrait-static");
+		const canvas =
+			document.querySelector<HTMLCanvasElement>("#portrait-canvas");
+		const permBtn = document.querySelector<HTMLButtonElement>(
+			"#motion-permission-btn",
+		);
 
 		if (!staticImg || !canvas || !permBtn) return;
 
@@ -318,7 +543,7 @@ const depthmap = await getImage({ src: depthmapSrc });
 				canvas.style.height = scaledH + "px";
 				canvas.classList.add("active");
 
-				// Ensure OGL is initialized and start the render loop
+				// Ensure Point Cloud is initialized and start the render loop
 				requestAnimationFrame(() => {
 					ensureDepthEffect(canvas);
 					setupMotionInput(canvas, permBtn);
@@ -368,7 +593,9 @@ const depthmap = await getImage({ src: depthmapSrc });
 		height: 100%;
 		width: auto;
 		transform: rotate(-1deg);
-		transition: transform 0.3s ease, opacity 0.35s ease;
+		transition:
+			transform 0.3s ease,
+			opacity 0.35s ease;
 	}
 
 	.portrait-img:hover {
