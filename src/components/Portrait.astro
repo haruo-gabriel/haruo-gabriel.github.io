@@ -1,0 +1,675 @@
+---
+import { getImage } from "astro:assets";
+import { Image } from "astro:assets";
+import portraitSrc from "../assets/eu.jpg";
+import depthmapSrc from "../assets/eu-depthmap.webp";
+
+const portrait = await getImage({ src: portraitSrc });
+const depthmap = await getImage({ src: depthmapSrc });
+---
+
+<div class="my-portrait" id="portrait-container">
+	<Image
+		src={portraitSrc}
+		alt="Haruo"
+		class="portrait-img"
+		id="portrait-static"
+		height={1024}
+		loading="eager"
+	/>
+	<canvas
+		id="portrait-canvas"
+		aria-hidden="true"
+		data-portrait-src={portrait.src}
+		data-depthmap-src={depthmap.src}></canvas>
+	<button id="motion-permission-btn" aria-label="Enable motion effect">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			<path d="M12 18H12.01"></path>
+			<path d="M7 20L5 22"></path>
+			<path d="M17 20L19 22"></path>
+			<path d="M5 2L7 4"></path>
+			<path d="M19 2L17 4"></path>
+			<rect x="5" y="4" width="14" height="16" rx="2"></rect>
+		</svg>
+		Enable motion
+	</button>
+</div>
+
+<script>
+	import * as THREE from "three";
+
+	// ═══════════════════════════════════════════
+	// POINT CLOUD EFFECT — CONFIGURATION MACROS
+	// ═══════════════════════════════════════════
+	const CONFIG = {
+		/** Resolution of the point cloud grid (width & height). 256x256 is optimal. */
+		gridResolution: 256,
+		/** Size of each point in pixels. */
+		pointSize: 2.0,
+		/** Z-axis extrusion depth (thickness of the 3D volume). */
+		zScale: 1.0,
+		/** Maximum Y-axis rotation (horizontal tilt) in radians. */
+		maxRotationY: 2.0,
+		/** Maximum X-axis rotation (vertical tilt) in radians. */
+		maxRotationX: 2.0,
+		/** Mouse rotation interpolation speed. Higher = snappier, lower = smoother. */
+		smoothingSpeed: 0.08,
+		/** Accelerometer range mapping (degrees) for gyroscope control. */
+		tiltRangeDeg: 40,
+		/** Camera Z position from the scene origin. */
+		cameraZ: 1.8,
+		/** Camera field of view (FOV). */
+		cameraFov: 50,
+		/**
+		 * Turbo colormap depth decode parameters.
+		 * scale: 0.5 and bias: 0.5 maps (R - B) colormap range to [0, 1].
+		 */
+		decodeScale: 0.5,
+		decodeBias: 0.5,
+	};
+	// ═══════════════════════════════════════════
+
+	// ─────────────────────────────────────────
+	// State — cached for reuse on subsequent zooms
+	// ─────────────────────────────────────────
+	let rafHandle: number | null = null;
+	let glRenderer: THREE.WebGLRenderer | null = null;
+	let glScene: THREE.Scene | null = null;
+	let glCamera: THREE.PerspectiveCamera | null = null;
+	let glGeometry: THREE.BufferGeometry | null = null;
+	let glMaterial: THREE.ShaderMaterial | null = null;
+	let glPoints: THREE.Points | null = null;
+
+	let targetRotationX = 0; // horizontal tilt (rotates around Y-axis)
+	let targetRotationY = 0; // vertical tilt (rotates around X-axis)
+	let currentRotationX = 0;
+	let currentRotationY = 0;
+
+	let targetMouseX = 0;
+	let targetMouseY = 0;
+
+	// Cached raw pixel data arrays
+	let colorPixels: Uint8ClampedArray | null = null;
+	let depthPixels: Uint8ClampedArray | null = null;
+	let imageAspectRatio = 1.0;
+	let assetsLoaded = false;
+	let isInitializing = false;
+
+	function lerp(a: number, b: number, t: number) {
+		return a + (b - a) * t;
+	}
+	function clamp(v: number, min: number, max: number) {
+		return Math.max(min, Math.min(max, v));
+	}
+
+	// ─────────────────────────────────────────
+	// Input handlers
+	// ─────────────────────────────────────────
+	function onMouseMove(e: MouseEvent) {
+		targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+		targetMouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
+		targetRotationX = targetMouseX * CONFIG.maxRotationY;
+		targetRotationY = targetMouseY * CONFIG.maxRotationX;
+	}
+
+	function onDeviceOrientation(e: DeviceOrientationEvent) {
+		if (e.gamma === null || e.beta === null) return;
+		targetMouseX = clamp(e.gamma / CONFIG.tiltRangeDeg, -1, 1);
+		targetMouseY = clamp(
+			(e.beta - CONFIG.tiltRangeDeg) / CONFIG.tiltRangeDeg,
+			-1,
+			1,
+		);
+		targetRotationX = targetMouseX * CONFIG.maxRotationY;
+		targetRotationY = targetMouseY * CONFIG.maxRotationX;
+	}
+
+	// Helper to load an HTML Image
+	function loadImage(url: string): Promise<HTMLImageElement> {
+		return new Promise((resolve, reject) => {
+			const img = new window.Image();
+			img.crossOrigin = "anonymous";
+			img.onload = () => resolve(img);
+			img.onerror = (err) => reject(err);
+			img.src = url;
+		});
+	}
+
+	// Helper to extract pixel colors from an image using offscreen canvas
+	function getPixelData(
+		img: HTMLImageElement,
+		width: number,
+		height: number,
+	): Uint8ClampedArray {
+		const canvas = document.createElement("canvas");
+		canvas.width = width;
+		canvas.height = height;
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return new Uint8ClampedArray();
+		ctx.drawImage(img, 0, 0, width, height);
+		return ctx.getImageData(0, 0, width, height).data;
+	}
+
+	// ─────────────────────────────────────────
+	// Three.js renderer — lazy-init and cached
+	// ─────────────────────────────────────────
+	async function ensureDepthEffect(canvas: HTMLCanvasElement) {
+		if (isInitializing) return;
+
+		const width = canvas.offsetWidth;
+		const height = canvas.offsetHeight;
+
+		// Already initialized — update size, scene camera aspect ratio, restart loop
+		if (glRenderer && glScene && glCamera && glPoints) {
+			glRenderer.setSize(width, height, false);
+			glCamera.aspect = width / height;
+			glCamera.updateProjectionMatrix();
+			startLoop();
+			return;
+		}
+
+		isInitializing = true;
+
+		const portraitUrl = canvas.dataset.portraitSrc!;
+		const depthmapUrl = canvas.dataset.depthmapSrc!;
+
+		try {
+			// Preload and sample assets if not already cached
+			if (!assetsLoaded) {
+				const [portraitImg, depthmapImg] = await Promise.all([
+					loadImage(portraitUrl),
+					loadImage(depthmapUrl),
+				]);
+
+				imageAspectRatio =
+					portraitImg.naturalWidth / portraitImg.naturalHeight;
+
+				// Downsample on the CPU
+				colorPixels = getPixelData(
+					portraitImg,
+					CONFIG.gridResolution,
+					CONFIG.gridResolution,
+				);
+				depthPixels = getPixelData(
+					depthmapImg,
+					CONFIG.gridResolution,
+					CONFIG.gridResolution,
+				);
+				assetsLoaded = true;
+			}
+
+			if (!colorPixels || !depthPixels) return;
+
+			// Initialize Three.js renderer
+			glRenderer = new THREE.WebGLRenderer({
+				canvas,
+				alpha: true,
+				antialias: true,
+				premultipliedAlpha: false,
+			});
+			glRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+			glRenderer.setSize(width, height, false);
+
+			// Scene
+			glScene = new THREE.Scene();
+
+			// Camera
+			glCamera = new THREE.PerspectiveCamera(
+				CONFIG.cameraFov,
+				width / height,
+				0.1,
+				10,
+			);
+			glCamera.position.z = CONFIG.cameraZ;
+
+			// Generate BufferGeometry from pixel arrays
+			const count = CONFIG.gridResolution * CONFIG.gridResolution;
+			const positions = new Float32Array(count * 3);
+			const colors = new Float32Array(count * 3);
+
+			let idx = 0;
+			const res = CONFIG.gridResolution;
+			for (let r = 0; r < res; r++) {
+				for (let c = 0; c < res; c++) {
+					const pixelIdx = (r * res + c) * 4;
+
+					// Normalized position in [-0.5, 0.5], aspect corrected
+					const x = (c / res - 0.5) * imageAspectRatio;
+					const y = -(r / res - 0.5);
+
+					// Decode turbo colormap: (R - B) * scale + bias
+					const dr = depthPixels[pixelIdx] / 255.0;
+					const db = depthPixels[pixelIdx + 2] / 255.0;
+					const depth = clamp(
+						(dr - db) * CONFIG.decodeScale + CONFIG.decodeBias,
+						0.0,
+						1.0,
+					);
+
+					// Displace along Z, centered around 0
+					const z = (depth - 0.5) * CONFIG.zScale;
+
+					positions[idx * 3] = x;
+					positions[idx * 3 + 1] = y;
+					positions[idx * 3 + 2] = z;
+
+					// Colors normalized to [0, 1]
+					colors[idx * 3] = colorPixels[pixelIdx] / 255.0;
+					colors[idx * 3 + 1] = colorPixels[pixelIdx + 1] / 255.0;
+					colors[idx * 3 + 2] = colorPixels[pixelIdx + 2] / 255.0;
+
+					idx++;
+				}
+			}
+
+			glGeometry = new THREE.BufferGeometry();
+			glGeometry.setAttribute(
+				"position",
+				new THREE.BufferAttribute(positions, 3),
+			);
+			glGeometry.setAttribute(
+				"color",
+				new THREE.BufferAttribute(colors, 3),
+			);
+
+			// Custom shaders for 3D rotation, attenuation, and circular styling
+			const vertexShader = `
+				uniform float uPointSize;
+				uniform vec2 uRotation;
+				varying vec3 vColor;
+
+				vec3 rotateY(vec3 p, float angle) {
+					float c = cos(angle);
+					float s = sin(angle);
+					return vec3(p.x * c - p.z * s, p.y, p.x * s + p.z * c);
+				}
+
+				vec3 rotateX(vec3 p, float angle) {
+					float c = cos(angle);
+					float s = sin(angle);
+					return vec3(p.x, p.y * c - p.z * s, p.y * s + p.z * c);
+				}
+
+				void main() {
+					vColor = color;
+					
+					// Apply interactive 3D tilt
+					vec3 pos = position;
+					pos = rotateY(pos, uRotation.x);
+					pos = rotateX(pos, uRotation.y);
+
+					vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+					gl_Position = projectionMatrix * mvPosition;
+
+					// Attenuate point size based on camera distance
+					// Since camera Z is 1.8, using (1.8 / -mvPosition.z) keeps the base point size
+					// close to uPointSize while providing a natural distance attenuation.
+					gl_PointSize = uPointSize * (1.8 / -mvPosition.z);
+				}
+			`;
+
+			const fragmentShader = `
+				varying vec3 vColor;
+
+				void main() {
+					// Draw smooth circular particles
+					vec2 circCoord = gl_PointCoord - vec2(0.5);
+					if (dot(circCoord, circCoord) > 0.25) {
+						discard;
+					}
+					
+					// Add a soft edge glow effect
+					float alpha = 1.0 - smoothstep(0.15, 0.25, dot(circCoord, circCoord));
+					gl_FragColor = vec4(vColor, alpha);
+				}
+			`;
+
+			glMaterial = new THREE.ShaderMaterial({
+				vertexShader,
+				fragmentShader,
+				uniforms: {
+					uPointSize: { value: CONFIG.pointSize },
+					uRotation: { value: new THREE.Vector2(0, 0) },
+				},
+				vertexColors: true,
+				transparent: true,
+				depthWrite: false,
+				depthTest: true,
+			});
+
+			glPoints = new THREE.Points(glGeometry, glMaterial);
+			glScene.add(glPoints);
+
+			// Handle window resizes
+			window.addEventListener("resize", onResize);
+
+			startLoop();
+			isInitializing = false;
+		} catch (err) {
+			console.error("Failed to initialize point cloud effect:", err);
+			isInitializing = false;
+		}
+	}
+
+	function onResize() {
+		const canvas =
+			document.querySelector<HTMLCanvasElement>("#portrait-canvas");
+		if (canvas && glRenderer && glCamera) {
+			glRenderer.setSize(canvas.offsetWidth, canvas.offsetHeight, false);
+			glCamera.aspect = canvas.offsetWidth / canvas.offsetHeight;
+			glCamera.updateProjectionMatrix();
+		}
+	}
+
+	function startLoop() {
+		if (rafHandle !== null) return;
+		function loop() {
+			rafHandle = requestAnimationFrame(loop);
+
+			// Interpolate orientation/mouse rotation
+			currentRotationX = lerp(
+				currentRotationX,
+				targetRotationX,
+				CONFIG.smoothingSpeed,
+			);
+			currentRotationY = lerp(
+				currentRotationY,
+				targetRotationY,
+				CONFIG.smoothingSpeed,
+			);
+
+			if (glMaterial) {
+				glMaterial.uniforms.uRotation.value.set(
+					currentRotationX,
+					currentRotationY,
+				);
+			}
+
+			if (glRenderer && glScene && glCamera) {
+				glRenderer.render(glScene, glCamera);
+			}
+		}
+		loop();
+	}
+
+	/** Pause: stop RAF and detach input. Three.js context remains alive. */
+	function pauseDepthEffect() {
+		if (rafHandle !== null) {
+			cancelAnimationFrame(rafHandle);
+			rafHandle = null;
+		}
+		window.removeEventListener("mousemove", onMouseMove);
+		window.removeEventListener("deviceorientation", onDeviceOrientation);
+		targetRotationX = 0;
+		targetRotationY = 0;
+		targetMouseX = 0;
+		targetMouseY = 0;
+	}
+
+	/** Full teardown: releases WebGL context and disposes resources. */
+	function teardownDepthEffect() {
+		pauseDepthEffect();
+		window.removeEventListener("resize", onResize);
+
+		if (glPoints && glScene) {
+			glScene.remove(glPoints);
+		}
+		if (glGeometry) {
+			glGeometry.dispose();
+			glGeometry = null;
+		}
+		if (glMaterial) {
+			glMaterial.dispose();
+			glMaterial = null;
+		}
+		if (glRenderer) {
+			glRenderer.dispose();
+			glRenderer.forceContextLoss();
+			glRenderer = null;
+		}
+
+		glScene = null;
+		glCamera = null;
+		glPoints = null;
+
+		colorPixels = null;
+		depthPixels = null;
+		assetsLoaded = false;
+		currentRotationX = 0;
+		currentRotationY = 0;
+	}
+
+	// ─────────────────────────────────────────
+	// iOS permission flow
+	// ─────────────────────────────────────────
+	function isMobile() {
+		return window.matchMedia("(pointer: coarse)").matches;
+	}
+
+	function setupMotionInput(
+		canvas: HTMLCanvasElement,
+		permBtn: HTMLButtonElement,
+	) {
+		if (!isMobile()) {
+			window.addEventListener("mousemove", onMouseMove);
+			permBtn.style.display = "none";
+			return;
+		}
+
+		// Android & other mobile: no permission API needed
+		const needsPermission =
+			typeof (
+				DeviceOrientationEvent as unknown as {
+					requestPermission?: () => Promise<string>;
+				}
+			).requestPermission === "function";
+
+		if (!needsPermission) {
+			window.addEventListener("deviceorientation", onDeviceOrientation);
+			permBtn.style.display = "none";
+			return;
+		}
+
+		// iOS 13+: show the permission button
+		permBtn.style.display = "flex";
+		permBtn.onclick = async () => {
+			try {
+				const result = await (
+					DeviceOrientationEvent as unknown as {
+						requestPermission: () => Promise<string>;
+					}
+				).requestPermission();
+				if (result === "granted") {
+					window.addEventListener(
+						"deviceorientation",
+						onDeviceOrientation,
+					);
+					permBtn.style.display = "none";
+				}
+			} catch (err) {
+				console.warn("Motion permission denied:", err);
+			}
+		};
+	}
+
+	// ─────────────────────────────────────────
+	// Zoom logic
+	// ─────────────────────────────────────────
+	function initPortrait() {
+		const staticImg =
+			document.querySelector<HTMLElement>("#portrait-static");
+		const canvas =
+			document.querySelector<HTMLCanvasElement>("#portrait-canvas");
+		const permBtn = document.querySelector<HTMLButtonElement>(
+			"#motion-permission-btn",
+		);
+
+		if (!staticImg || !canvas || !permBtn) return;
+
+		staticImg.addEventListener("click", () => {
+			const isZoomed = staticImg.classList.toggle("zoomed");
+
+			if (isZoomed) {
+				// Calculate zoom transform
+				const rect = staticImg.getBoundingClientRect();
+				const scaleX = (window.innerWidth * 0.9) / rect.width;
+				const scaleY = (window.innerHeight * 0.9) / rect.height;
+				const scale = Math.min(scaleX, scaleY, 4.5);
+
+				const scaledW = rect.width * scale;
+				const scaledH = rect.height * scale;
+				const canvasLeft = (window.innerWidth - scaledW) / 2;
+				const canvasTop = (window.innerHeight - scaledH) / 2;
+
+				const viewportCenterX = window.innerWidth / 2;
+				const viewportCenterY = window.innerHeight / 2;
+				const imageCenterX = rect.left + rect.width / 2;
+				const imageCenterY = rect.top + rect.height / 2;
+
+				staticImg.style.transform = `translate(${viewportCenterX - imageCenterX}px, ${viewportCenterY - imageCenterY}px) scale(${scale})`;
+
+				// Position canvas exactly where the zoomed image appears
+				canvas.style.left = canvasLeft + "px";
+				canvas.style.top = canvasTop + "px";
+				canvas.style.width = scaledW + "px";
+				canvas.style.height = scaledH + "px";
+				canvas.classList.add("active");
+
+				// Ensure Point Cloud is initialized and start the render loop
+				requestAnimationFrame(() => {
+					ensureDepthEffect(canvas);
+					setupMotionInput(canvas, permBtn);
+				});
+			} else {
+				staticImg.style.transform = "";
+				canvas.classList.remove("active");
+				permBtn.style.display = "none";
+				pauseDepthEffect();
+			}
+		});
+
+		// Canvas click closes zoom (canvas sits on top when active)
+		canvas.addEventListener("click", () => {
+			if (canvas.classList.contains("active")) {
+				staticImg.classList.remove("zoomed");
+				staticImg.style.transform = "";
+				canvas.classList.remove("active");
+				permBtn.style.display = "none";
+				pauseDepthEffect();
+			}
+		});
+	}
+
+	document.addEventListener("astro:page-load", initPortrait);
+
+	// Teardown before Astro swaps the DOM (full GL context release)
+	document.addEventListener("astro:before-swap", () => {
+		teardownDepthEffect();
+	});
+</script>
+
+<style>
+	/* PORTRAIT PICTURE */
+
+	.my-portrait {
+		position: relative;
+		display: flex;
+		justify-content: center;
+		align-self: center;
+		margin-right: 4rem;
+		height: 16rem; /* Container is the size authority */
+	}
+
+	.portrait-img {
+		display: block;
+		height: 100%;
+		width: auto;
+		transform: rotate(-1deg);
+		transition:
+			transform 0.3s ease,
+			opacity 0.35s ease;
+	}
+
+	.portrait-img:hover {
+		transform: rotate(0deg) scale(1.05);
+		cursor: zoom-in;
+	}
+
+	.portrait-img.zoomed {
+		z-index: 1000;
+		cursor: zoom-out;
+		opacity: 0; /* Canvas takes over */
+	}
+
+	/* WebGL Canvas Overlay */
+	#portrait-canvas {
+		position: fixed;
+		top: 0;
+		left: 0;
+		opacity: 0;
+		pointer-events: none;
+		z-index: 999;
+		transition: opacity 0.35s ease;
+	}
+
+	#portrait-canvas.active {
+		opacity: 1;
+		pointer-events: auto;
+		cursor: zoom-out;
+	}
+
+	/* iOS motion permission button */
+	#motion-permission-btn {
+		display: none;
+		position: fixed;
+		z-index: 1001;
+		bottom: 2rem;
+		left: 50%;
+		transform: translateX(-50%);
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.6rem 1.2rem;
+		background: rgba(20, 20, 20, 0.75);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid rgba(255, 255, 255, 0.15);
+		border-radius: 999px;
+		color: #fff;
+		font-family: var(--font-family-main);
+		font-size: 0.8rem;
+		cursor: pointer;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+		transition: background 0.2s ease;
+	}
+
+	#motion-permission-btn svg {
+		width: 1.1rem;
+		height: 1.1rem;
+		flex-shrink: 0;
+	}
+
+	#motion-permission-btn:hover {
+		background: rgba(40, 40, 40, 0.9);
+	}
+
+	/* RESPONSIVE DESIGN */
+	@media (orientation: portrait) {
+		.my-portrait {
+			align-self: end;
+			margin: 4rem 0rem 2rem 0rem;
+			height: 8rem;
+		}
+
+		.portrait-img {
+			height: 100%;
+		}
+	}
+</style>
