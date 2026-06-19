@@ -2,7 +2,7 @@
 import { getImage } from "astro:assets";
 import { Image } from "astro:assets";
 import portraitSrc from "../assets/eu.jpg";
-import depthmapSrc from "../assets/eu-depthmap.webp";
+import depthmapSrc from "../assets/eu-depthmap-grayscale.png";
 
 const portrait = await getImage({ src: portraitSrc });
 const depthmap = await getImage({ src: depthmapSrc });
@@ -55,7 +55,7 @@ const depthmap = await getImage({ src: depthmapSrc });
 		/** Size of each point in pixels. */
 		pointSize: 2.0,
 		/** Z-axis extrusion depth (thickness of the 3D volume). */
-		zScale: 1.0,
+		zScale: 0.4,
 		/** Maximum Y-axis rotation (horizontal tilt) in radians. */
 		maxRotationY: 2.0,
 		/** Maximum X-axis rotation (vertical tilt) in radians. */
@@ -63,17 +63,11 @@ const depthmap = await getImage({ src: depthmapSrc });
 		/** Mouse rotation interpolation speed. Higher = snappier, lower = smoother. */
 		smoothingSpeed: 0.08,
 		/** Accelerometer range mapping (degrees) for gyroscope control. */
-		tiltRangeDeg: 40,
+		tiltRangeDeg: 30,
 		/** Camera Z position from the scene origin. */
 		cameraZ: 1.8,
 		/** Camera field of view (FOV). */
 		cameraFov: 50,
-		/**
-		 * Turbo colormap depth decode parameters.
-		 * scale: 0.5 and bias: 0.5 maps (R - B) colormap range to [0, 1].
-		 */
-		decodeScale: 0.5,
-		decodeBias: 0.5,
 	};
 	// ═══════════════════════════════════════════
 
@@ -245,14 +239,8 @@ const depthmap = await getImage({ src: depthmapSrc });
 					const x = (c / res - 0.5) * imageAspectRatio;
 					const y = -(r / res - 0.5);
 
-					// Decode turbo colormap: (R - B) * scale + bias
-					const dr = depthPixels[pixelIdx] / 255.0;
-					const db = depthPixels[pixelIdx + 2] / 255.0;
-					const depth = clamp(
-						(dr - db) * CONFIG.decodeScale + CONFIG.decodeBias,
-						0.0,
-						1.0,
-					);
+					// Grayscale depth: read the red channel directly (R = G = B)
+					const depth = depthPixels[pixelIdx] / 255.0;
 
 					// Displace along Z, centered around 0
 					const z = (depth - 0.5) * CONFIG.zScale;
