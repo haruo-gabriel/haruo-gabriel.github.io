@@ -1,19 +1,11 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { Image } from "astro:assets";
-import myPortrait from "../assets/eu.jpg";
+import Portrait from "../components/Portrait.astro";
 ---
 
 <BaseLayout title="bio - haruo g.">
 	<section class="formal-content">
-		<div class="my-portrait">
-			<Image
-				src={myPortrait}
-				alt="Haruo"
-				class="portrait-img"
-				height={1024}
-			/>
-		</div>
+		<Portrait />
 		<div class="my-description">
 			<p>
 				Gabriel Haruo Hanai Takeuchi. Baseado em São Paulo, SP, Brasil.
@@ -42,42 +34,6 @@ import myPortrait from "../assets/eu.jpg";
 		<p>gosto de restaurantes pequenos e aconchegantes.</p>
 		<p>não gosto de dias nublados.</p>
 	</section>
-
-	<script>
-		// Setup Image Zoom functionality on page load
-		document.addEventListener("astro:page-load", () => {
-			const portraitImg =
-				document.querySelector<HTMLElement>(".portrait-img");
-			if (portraitImg) {
-				portraitImg.addEventListener("click", () => {
-					const isZoomed = portraitImg.classList.toggle("zoomed");
-
-					if (isZoomed) {
-						// Calculate distance to center of viewport
-						const rect = portraitImg.getBoundingClientRect();
-						const viewportCenterX = window.innerWidth / 2;
-						const viewportCenterY = window.innerHeight / 2;
-						const imageCenterX = rect.left + rect.width / 2;
-						const imageCenterY = rect.top + rect.height / 2;
-
-						const translateX = viewportCenterX - imageCenterX;
-						const translateY = viewportCenterY - imageCenterY;
-
-						// Calculate max scale to fit within 90% of viewport
-						const scaleX = (window.innerWidth * 0.9) / rect.width;
-						const scaleY = (window.innerHeight * 0.9) / rect.height;
-						const scale = Math.min(scaleX, scaleY, 4.5); // cap at 4.5x scale
-
-						// Apply dynamic transform
-						portraitImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-					} else {
-						// Reset to default
-						portraitImg.style.transform = "";
-					}
-				});
-			}
-		});
-	</script>
 </BaseLayout>
 
 <style>
@@ -94,35 +50,6 @@ import myPortrait from "../assets/eu.jpg";
 	.formal-content p {
 		font-family: var(--font-family-secondary);
 		font-size: var(--font-size-secondary);
-	}
-
-	/* PORTRAIT PICTURE */
-
-	.my-portrait {
-		display: flex;
-		justify-content: center;
-		align-self: center;
-		margin-right: 4rem;
-		height: 16rem; /* Container is the size authority */
-	}
-
-	.portrait-img {
-		display: block;
-		height: 100%;
-		width: auto;
-		transform: rotate(-1deg);
-		transition: transform 0.3s ease;
-	}
-
-	.portrait-img:hover {
-		transform: rotate(0deg) scale(1.05);
-		cursor: zoom-in;
-	}
-
-	.portrait-img.zoomed {
-		z-index: 1000;
-		box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.8);
-		cursor: zoom-out;
 	}
 
 	/* Ensure the parent doesn't clip the zoomed image or backdrop */
@@ -160,19 +87,6 @@ import myPortrait from "../assets/eu.jpg";
 		.formal-content {
 			grid-template-columns: 1fr;
 			grid-template-rows: auto auto;
-		}
-
-		.my-portrait {
-			align-self: end;
-			margin: 4rem 0rem 2rem 0rem;
-		}
-
-		.my-portrait {
-			height: 8rem;
-		}
-
-		.portrait-img {
-			height: 100%;
 		}
 
 		.my-description {

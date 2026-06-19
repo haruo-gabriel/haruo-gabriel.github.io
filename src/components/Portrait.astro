@@ -1,0 +1,94 @@
+---
+import { Image } from "astro:assets";
+import myPortrait from "../assets/eu.jpg";
+---
+
+<div class="my-portrait">
+	<Image
+		src={myPortrait}
+		alt="Haruo"
+		class="portrait-img"
+		height={1024}
+		loading="eager"
+	/>
+</div>
+
+<script>
+	// Setup Image Zoom functionality on page load
+	document.addEventListener("astro:page-load", () => {
+		const portraitImg =
+			document.querySelector<HTMLElement>(".portrait-img");
+		if (portraitImg) {
+			portraitImg.addEventListener("click", () => {
+				const isZoomed = portraitImg.classList.toggle("zoomed");
+
+				if (isZoomed) {
+					// Calculate distance to center of viewport
+					const rect = portraitImg.getBoundingClientRect();
+					const viewportCenterX = window.innerWidth / 2;
+					const viewportCenterY = window.innerHeight / 2;
+					const imageCenterX = rect.left + rect.width / 2;
+					const imageCenterY = rect.top + rect.height / 2;
+
+					const translateX = viewportCenterX - imageCenterX;
+					const translateY = viewportCenterY - imageCenterY;
+
+					// Calculate max scale to fit within 90% of viewport
+					const scaleX = (window.innerWidth * 0.9) / rect.width;
+					const scaleY = (window.innerHeight * 0.9) / rect.height;
+					const scale = Math.min(scaleX, scaleY, 4.5); // cap at 4.5x scale
+
+					// Apply dynamic transform
+					portraitImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+				} else {
+					// Reset to default
+					portraitImg.style.transform = "";
+				}
+			});
+		}
+	});
+</script>
+
+<style>
+	/* PORTRAIT PICTURE */
+
+	.my-portrait {
+		display: flex;
+		justify-content: center;
+		align-self: center;
+		margin-right: 4rem;
+		height: 16rem; /* Container is the size authority */
+	}
+
+	.portrait-img {
+		display: block;
+		height: 100%;
+		width: auto;
+		transform: rotate(-1deg);
+		transition: transform 0.3s ease;
+	}
+
+	.portrait-img:hover {
+		transform: rotate(0deg) scale(1.05);
+		cursor: zoom-in;
+	}
+
+	.portrait-img.zoomed {
+		z-index: 1000;
+		box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.8);
+		cursor: zoom-out;
+	}
+
+	/* RESPONSIVE DESIGN */
+	@media (orientation: portrait) {
+		.my-portrait {
+			align-self: end;
+			margin: 4rem 0rem 2rem 0rem;
+			height: 8rem;
+		}
+
+		.portrait-img {
+			height: 100%;
+		}
+	}
+</style>
